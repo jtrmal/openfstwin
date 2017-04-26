@@ -4,8 +4,9 @@ if HAVE_BIN
 bin_PROGRAMS = pdtcompose pdtexpand pdtinfo pdtreplace pdtreverse \
                pdtshortestpath
 
-LDADD = libfstpdtscript.la ../../script/libfstscript.la \
-	../../lib/libfst.la -lm -ldl
+LDADD = libfstpdtscript.la \
+        ../../script/libfstscript.la \
+        ../../lib/libfst.la -lm $(DL_LIBS)
 
 pdtcompose_SOURCES = pdtcompose.cc
 
@@ -15,15 +16,15 @@ pdtinfo_SOURCES = pdtinfo.cc
 
 pdtreplace_SOURCES = pdtreplace.cc
 
-pdtreverse_SOURCES = pdtreverse.cc 
+pdtreverse_SOURCES = pdtreverse.cc
 
-pdtshortestpath_SOURCES = pdtshortestpath.cc 
+pdtshortestpath_SOURCES = pdtshortestpath.cc
 endif
 
-libfstdir = @libfstdir@
-
 if HAVE_SCRIPT
-libfst_LTLIBRARIES = libfstpdtscript.la
-libfstpdtscript_la_SOURCES = pdtscript.cc
-libfstpdtscript_la_LDFLAGS = -version-info 1:0:0
+lib_LTLIBRARIES = libfstpdtscript.la
+libfstpdtscript_la_SOURCES = getters.cc pdtscript.cc
+libfstpdtscript_la_LDFLAGS = -version-info 7:0:0
+libfstpdtscript_la_LIBADD = ../../script/libfstscript.la \
+                            ../../lib/libfst.la -lm $(DL_LIBS)
 endif

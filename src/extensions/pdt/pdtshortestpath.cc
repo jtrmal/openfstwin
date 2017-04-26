@@ -1,37 +1,32 @@
-// pdtshortestpath.cc
+// See www.openfst.org for extensive documentation on this weighted
+// finite-state transducer library.
+//
+// Returns the shortest path in a (bounded-stack) PDT.
 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// Copyright 2005-2010 Google, Inc.
-// Author: riley@google.com (Michael Riley)
-// Modified: jpr@google.com (Jake Ratkiewicz) to use FstClass
-//
-// \file
-// Return the shortest path in a (bounded-stack) PDT.
-//
+#include <cstring>
+
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <fst/log.h>
 
 #include <fst/extensions/pdt/pdtscript.h>
 #include <fst/util.h>
 
-
-DEFINE_bool(keep_parentheses, false, "Keep PDT parentheses in result.");
-DEFINE_string(queue_type, "fifo", "Queue type: one of: "
+DEFINE_bool(keep_parentheses, false, "Keep PDT parentheses in result?");
+DEFINE_string(queue_type, "fifo",
+              "Queue type: one of: "
               "\"fifo\", \"lifo\", \"state\"");
-DEFINE_bool(path_gc, true, "Garbage collect shortest path data");
-DEFINE_string(pdt_parentheses, "", "PDT parenthesis label pairs.");
+DEFINE_bool(path_gc, true, "Garbage collect shortest path data?");
+DEFINE_string(pdt_parentheses, "", "PDT parenthesis label pairs");
 
 int main(int argc, char **argv) {
   namespace s = fst::script;
+  using fst::script::FstClass;
+  using fst::script::VectorFstClass;
+  using fst::QueueType;
+  using fst::ReadLabelPairs;
 
   string usage = "Shortest path in a (bounded-stack) PDT.\n\n  Usage: ";
   usage += argv[0];
@@ -44,10 +39,11 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  string in_name = (argc > 1 && (strcmp(argv[1], "-") != 0)) ? argv[1] : "";
-  string out_name = argc > 2 ? argv[2] : "";
+  const string in_name =
+      (argc > 1 && (strcmp(argv[1], "-") != 0)) ? argv[1] : "";
+  const string out_name = argc > 2 ? argv[2] : "";
 
-  s::FstClass *ifst = s::FstClass::Read(in_name);
+  std::unique_ptr<FstClass> ifst(FstClass::Read(in_name));
   if (!ifst) return 1;
 
   if (FLAGS_pdt_parentheses.empty()) {
@@ -55,13 +51,12 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  vector<pair<int64, int64> > parens, rparens;
-  fst::ReadLabelPairs(FLAGS_pdt_parentheses, &parens, false);
+  std::vector<s::LabelPair> parens;
+  if (!ReadLabelPairs(FLAGS_pdt_parentheses, &parens, false)) return 1;
 
-  s::VectorFstClass ofst(ifst->ArcType());
+  VectorFstClass ofst(ifst->ArcType());
 
-  fst::QueueType qt;
-
+  QueueType qt;
   if (FLAGS_queue_type == "fifo") {
     qt = fst::FIFO_QUEUE;
   } else if (FLAGS_queue_type == "lifo") {
@@ -69,12 +64,15 @@ int main(int argc, char **argv) {
   } else if (FLAGS_queue_type == "state") {
     qt = fst::STATE_ORDER_QUEUE;
   } else {
-    LOG(ERROR) << "Unknown or unsupported queue type: " << FLAGS_queue_type;
+    LOG(ERROR) << "Unknown queue type: " << FLAGS_queue_type;
     return 1;
   }
 
-  s::PdtShortestPathOptions opts(qt, FLAGS_keep_parentheses, FLAGS_path_gc);
+  const s::PdtShortestPathOptions opts(qt, FLAGS_keep_parentheses,
+                                       FLAGS_path_gc);
+
   s::PdtShortestPath(*ifst, parens, &ofst, opts);
+
   ofst.Write(out_name);
 
   return 0;

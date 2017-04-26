@@ -1,30 +1,20 @@
-
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// See www.openfst.org for extensive documentation on this weighted
+// finite-state transducer library.
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// Copyright 2005-2010 Google, Inc.
-// Author: jpr@google.com (Jake Ratkiewicz)
-
-// Represents a generic weight in an FST -- that is, represents a specific
-// type of weight underneath while hiding that type from a client.
-
+// Represents a generic weight in an FST; that is, represents a specific type
+// of weight underneath while hiding that type from a client.
 
 #ifndef FST_SCRIPT_WEIGHT_CLASS_H_
 #define FST_SCRIPT_WEIGHT_CLASS_H_
 
+#include <memory>
+#include <ostream>
 #include <string>
 
+#include <fst/arc.h>
 #include <fst/generic-register.h>
 #include <fst/util.h>
+#include <fst/weight.h>
 
 namespace fst {
 namespace script {
@@ -32,101 +22,121 @@ namespace script {
 class WeightImplBase {
  public:
   virtual WeightImplBase *Copy() const = 0;
-  virtual void Print(ostream *o) const = 0;
+  virtual void Print(std::ostream *o) const = 0;
   virtual const string &Type() const = 0;
-  virtual string to_string() const = 0;
-  virtual bool operator == (const WeightImplBase &other) const = 0;
-  virtual ~WeightImplBase() { }
+  virtual string ToString() const = 0;
+  virtual bool operator==(const WeightImplBase &other) const = 0;
+  virtual bool operator!=(const WeightImplBase &other) const = 0;
+  virtual WeightImplBase &PlusEq(const WeightImplBase &other) = 0;
+  virtual WeightImplBase &TimesEq(const WeightImplBase &other) = 0;
+  virtual WeightImplBase &DivideEq(const WeightImplBase &other) = 0;
+  virtual WeightImplBase &PowerEq(size_t n) = 0;
+  virtual ~WeightImplBase() {}
 };
 
-template<class W>
-struct WeightClassImpl : public WeightImplBase {
-  W weight;
+template <class W>
+class WeightClassImpl : public WeightImplBase {
+ public:
+  explicit WeightClassImpl(const W &weight) : weight_(weight) {}
 
-  explicit WeightClassImpl(const W& weight) : weight(weight) { }
-
-  virtual WeightClassImpl<W> *Copy() const {
-    return new WeightClassImpl<W>(weight);
+  WeightClassImpl<W> *Copy() const final {
+    return new WeightClassImpl<W>(weight_);
   }
 
-  virtual const string &Type() const { return W::Type(); }
+  const string &Type() const final { return W::Type(); }
 
-  virtual void Print(ostream *o) const {
-    *o << weight;
-  }
+  void Print(std::ostream *ostrm) const final { *ostrm << weight_; }
 
-  virtual string to_string() const {
+  string ToString() const final {
     string str;
-    WeightToStr(weight, &str);
+    WeightToStr(weight_, &str);
     return str;
   }
 
-  virtual bool operator == (const WeightImplBase &other) const {
-    if (Type() != other.Type()) {
-      return false;
-    } else {
-      const WeightClassImpl<W> *typed_other =
-          static_cast<const WeightClassImpl<W> *>(&other);
-
-      return typed_other->weight == weight;
-    }
+  bool operator==(const WeightImplBase &other) const final {
+    const auto *typed_other = static_cast<const WeightClassImpl<W> *>(&other);
+    return weight_ == typed_other->weight_;
   }
+
+  bool operator!=(const WeightImplBase &other) const final {
+    return !(*this == other);
+  }
+
+  WeightClassImpl<W> &PlusEq(const WeightImplBase &other) final {
+    const auto *typed_other = static_cast<const WeightClassImpl<W> *>(&other);
+    weight_ = Plus(weight_, typed_other->weight_);
+    return *this;
+  }
+
+  WeightClassImpl<W> &TimesEq(const WeightImplBase &other) final {
+    const auto *typed_other = static_cast<const WeightClassImpl<W> *>(&other);
+    weight_ = Times(weight_, typed_other->weight_);
+    return *this;
+  }
+
+  WeightClassImpl<W> &DivideEq(const WeightImplBase &other) final {
+    const auto *typed_other = static_cast<const WeightClassImpl<W> *>(&other);
+    weight_ = Divide(weight_, typed_other->weight_);
+    return *this;
+  }
+
+  WeightClassImpl<W> &PowerEq(size_t n) final {
+    weight_ = Power(weight_, n);
+    return *this;
+  }
+
+  W *GetImpl() { return &weight_; }
+
+ private:
+  W weight_;
 };
 
 
 class WeightClass {
  public:
-  WeightClass() : element_type_(ZERO), impl_(0) { }
+  WeightClass() = default;
 
-  template<class W>
-  explicit WeightClass(const W& weight)
-  : element_type_(OTHER), impl_(new WeightClassImpl<W>(weight)) { }
+  template <class W>
+  explicit WeightClass(const W &weight)
+      : impl_(new WeightClassImpl<W>(weight)) {}
+
+  template <class W>
+  explicit WeightClass(const WeightClassImpl<W> &impl)
+      : impl_(new WeightClassImpl<W>(impl)) {}
 
   OPENFSTDLL WeightClass(const string &weight_type, const string &weight_str);
 
-  WeightClass(const WeightClass &other) :
-      element_type_(other.element_type_),
-      impl_(other.impl_ ? other.impl_->Copy() : 0) { }
+  WeightClass(const WeightClass &other)
+      : impl_(other.impl_ ? other.impl_->Copy() : nullptr) {}
 
-  WeightClass &operator = (const WeightClass &other) {
-    if (impl_) delete impl_;
-    impl_ = other.impl_ ? other.impl_->Copy() : 0;
-    element_type_ = other.element_type_;
+  WeightClass &operator=(const WeightClass &other) {
+    impl_.reset(other.impl_ ? other.impl_->Copy() : nullptr);
     return *this;
   }
 
-  template<class W>
-  const W* GetWeight() const;
+  static constexpr const char *__ZERO__ = "__ZERO__";  // NOLINT
 
-  string to_string() const {
-    switch (element_type_) {
-      case ZERO:
-        return "ZERO";
-      case ONE:
-        return "ONE";
-      default:
-      case OTHER:
-        return impl_->to_string();
+  static WeightClass Zero(const string &weight_type);
+
+  static constexpr const char *__ONE__ = "__ONE__";  // NOLINT
+
+  static WeightClass One(const string &weight_type);
+
+  static constexpr const char *__NOWEIGHT__ = "__NOWEIGHT__";  // NOLINT
+
+  static WeightClass NoWeight(const string &weight_type);
+
+  template <class W>
+  const W *GetWeight() const {
+    if (W::Type() != impl_->Type()) {
+       return nullptr;
+    } else {
+      auto *typed_impl = static_cast<WeightClassImpl<W> *>(impl_.get());
+      return typed_impl->GetImpl();
     }
   }
 
-  bool operator == (const WeightClass &other) const {
-    return element_type_ == other.element_type_ &&
-        ((impl_ && other.impl_ && (*impl_ == *other.impl_)) ||
-         (impl_ == 0 && other.impl_ == 0));
-  }
-
-  static const WeightClass &Zero() {
-    static WeightClass w(ZERO);
-
-    return w;
-  }
-
-  static const WeightClass &One() {
-    static WeightClass w(ONE);
-
-    return w;
-  }
+  string ToString() const { return (impl_) ? impl_->ToString() : "none"; }
 
   const string &Type() const {
     if (impl_) return impl_->Type();
@@ -134,86 +144,83 @@ class WeightClass {
     return no_type;
   }
 
+  bool WeightTypesMatch(const WeightClass &other, const string &op_name) const;
 
-  ~WeightClass() { if (impl_) delete impl_; }
+  friend bool operator==(const WeightClass &lhs, const WeightClass &rhs);
+
+  friend WeightClass Plus(const WeightClass &lhs, const WeightClass &rhs);
+
+  friend WeightClass Times(const WeightClass &lhs, const WeightClass &rhs);
+
+  friend WeightClass Divide(const WeightClass &lhs, const WeightClass &rhs);
+
+  friend WeightClass Power(const WeightClass &w, size_t n);
+
  private:
-  enum ElementType { ZERO, ONE, OTHER };
-  ElementType element_type_;
+  const WeightImplBase *GetImpl() const { return impl_.get(); }
 
-  WeightImplBase *impl_;
+  WeightImplBase *GetImpl() { return impl_.get(); }
 
-  explicit WeightClass(ElementType et) : element_type_(et), impl_(0) { }
+  std::unique_ptr<WeightImplBase> impl_;
 
-  friend ostream &operator << (ostream &o, const WeightClass &c);
+  friend std::ostream &operator<<(std::ostream &o, const WeightClass &c);
 };
 
-template<class W>
-const W* WeightClass::GetWeight() const {
-  // We need to store zero and one as statics, because the weight type
-  // W might return them as temporaries. We're returning a pointer,
-  // and it won't do to get the address of a temporary.
-  static const W zero = W::Zero();
-  static const W one = W::One();
+bool operator==(const WeightClass &lhs, const WeightClass &rhs);
 
-  if (element_type_ == ZERO) {
-    return &zero;
-  } else if (element_type_ == ONE) {
-    return &one;
-  } else {
-    if (W::Type() != impl_->Type()) {
-      return NULL;
-    } else {
-      WeightClassImpl<W> *typed_impl =
-          static_cast<WeightClassImpl<W> *>(impl_);
-      return &typed_impl->weight;
-    }
-  }
-}
+bool operator!=(const WeightClass &lhs, const WeightClass &rhs);
 
-//
+WeightClass Plus(const WeightClass &lhs, const WeightClass &rhs);
+
+WeightClass Times(const WeightClass &lhs, const WeightClass &rhs);
+
+WeightClass Divide(const WeightClass &lhs, const WeightClass &rhs);
+
+WeightClass Power(const WeightClass &w, size_t n);
+
+std::ostream &operator<<(std::ostream &o, const WeightClass &c);
+
 // Registration for generic weight types.
-//
 
-typedef WeightImplBase* (*StrToWeightImplBaseT)(const string &str,
-                                                const string &src,
-                                                size_t nline);
+using StrToWeightImplBaseT = WeightImplBase *(*)(const string &str,
+                                                 const string &src,
+                                                 size_t nline);
 
-template<class W>
-WeightImplBase* StrToWeightImplBase(const string &str,
-                                    const string &src, size_t nline) {
+template <class W>
+WeightImplBase *StrToWeightImplBase(const string &str, const string &src,
+                                    size_t nline) {
+  if (str == WeightClass::__ZERO__)
+    return new WeightClassImpl<W>(W::Zero());
+  else if (str == WeightClass::__ONE__)
+    return new WeightClassImpl<W>(W::One());
+  else if (str == WeightClass::__NOWEIGHT__)
+    return new WeightClassImpl<W>(W::NoWeight());
   return new WeightClassImpl<W>(StrToWeight<W>(str, src, nline));
 }
 
-// The following confuses swig, and doesn't need to be wrapped anyway.
-#ifndef SWIG
-ostream& operator << (ostream &o, const WeightClass &c);
-
-class WeightClassRegister : public GenericRegister<string,
-                                                   StrToWeightImplBaseT,
+class WeightClassRegister : public GenericRegister<string, StrToWeightImplBaseT,
                                                    WeightClassRegister> {
  protected:
-  virtual string ConvertKeyToSoFilename(const string &key) const {
-    return key + ".so";
+  string ConvertKeyToSoFilename(const string &key) const final {
+    string legal_type(key);
+    ConvertToLegalCSymbol(&legal_type);
+    return legal_type + ".so";
   }
 };
 
-typedef GenericRegisterer<WeightClassRegister> WeightClassRegisterer;
-#endif
+using WeightClassRegisterer = GenericRegisterer<WeightClassRegister>;
 
-// internal version, needs to be called by wrapper in order for
-// macro args to expand
-#define REGISTER_FST_WEIGHT__(Weight, line)                             \
-  static WeightClassRegisterer weight_registerer ## _ ## line(          \
-      Weight::Type(),                                                   \
-      StrToWeightImplBase<Weight>)
+// Internal version; needs to be called by wrapper in order for macro args to
+// expand.
+#define REGISTER_FST_WEIGHT__(Weight, line)                \
+  static WeightClassRegisterer weight_registerer##_##line( \
+      Weight::Type(), StrToWeightImplBase<Weight>)
 
-// This layer is where __FILE__ and __LINE__ are expanded
-#define REGISTER_FST_WEIGHT_EXPANDER(Weight, line)      \
+// This layer is where __FILE__ and __LINE__ are expanded.
+#define REGISTER_FST_WEIGHT_EXPANDER(Weight, line) \
   REGISTER_FST_WEIGHT__(Weight, line)
 
-//
 // Macro for registering new weight types. Clients call this.
-//
 #define REGISTER_FST_WEIGHT(Weight) \
   REGISTER_FST_WEIGHT_EXPANDER(Weight, __LINE__)
 

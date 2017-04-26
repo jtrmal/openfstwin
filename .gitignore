@@ -66,3 +66,10 @@ packages/
 
 #Test files
 *.testsettings
+
+# Patch junk files
+*.rej
+*.orig
+
+# Vim files
+*.swp

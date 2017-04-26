@@ -1,27 +1,16 @@
-// fstencode.cc
-
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// See www.openfst.org for extensive documentation on this weighted
+// finite-state transducer library.
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// Copyright 2005-2010 Google, Inc.
-// Author: riley@google.com (Michael Riley)
-// Modified: jpr@google.com (Jake Ratkiewicz) to use FstClass
-//
-// \file
 //  Encode transducer labels and/or weights.
-//
 
-#include <fst/script/encode.h>
+#include <cstring>
+
+#include <memory>
+#include <string>
+
 #include <fst/script/decode.h>
+#include <fst/script/encode.h>
+#include <fst/script/getters.h>
 
 /// EncodeMain specific flag definitions
 DEFINE_bool(encode_labels, false, "Encode output labels");
@@ -45,24 +34,22 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  string in_name = (strcmp(argv[1], "-") != 0) ? argv[1] : "";
-  string codex_name = argv[2];
-  string out_name = argc > 3 ? argv[3] : "";
+  const string in_name = (strcmp(argv[1], "-") != 0) ? argv[1] : "";
+  const string codex_name = argv[2];
+  const string out_name = argc > 3 ? argv[3] : "";
 
-  MutableFstClass *fst = MutableFstClass::Read(in_name, true);
+  std::unique_ptr<MutableFstClass> fst(MutableFstClass::Read(in_name, true));
   if (!fst) return 1;
 
-  if (FLAGS_decode == false) {
-    uint32 flags = 0;
-    flags |= FLAGS_encode_labels ? fst::kEncodeLabels : 0;
-    flags |= FLAGS_encode_weights ? fst::kEncodeWeights : 0;
-    s::Encode(fst, flags, FLAGS_encode_reuse, codex_name);
+  if (FLAGS_decode) {
+    s::Decode(fst.get(), codex_name);
     fst->Write(out_name);
   } else {
-    s::Decode(fst, codex_name);
+    const auto flags =
+        s::GetEncodeFlags(FLAGS_encode_labels, FLAGS_encode_weights);
+    s::Encode(fst.get(), flags, FLAGS_encode_reuse, codex_name);
     fst->Write(out_name);
   }
 
-  delete fst;
   return 0;
 }

@@ -1,24 +1,16 @@
-// fstdraw.cc
+// See www.openfst.org for extensive documentation on this weighted
+// finite-state transducer library.
+//
+// Draws a binary FSTs in the Graphviz dot text format.
 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// Copyright 2005-2010 Google, Inc.
-// Author: allauzen@google.com (Cyril Allauzen)
-// Modified: jpr@google.com (Jake Ratkiewicz) to use FstClass
-//
-// \file
-// Draws a binary FSTs in the Graphviz dot text format
+#include <cstring>
 
+#include <fstream>
+#include <memory>
+#include <ostream>
+#include <string>
+
+#include <fst/log.h>
 #include <fst/script/draw.h>
 
 DEFINE_bool(acceptor, false, "Input in acceptor format");
@@ -27,6 +19,8 @@ DEFINE_string(osymbols, "", "Output label symbol table");
 DEFINE_string(ssymbols, "", "State label symbol table");
 DEFINE_bool(numeric, false, "Print numeric labels");
 DEFINE_int32(precision, 5, "Set precision (number of char/float)");
+DEFINE_string(float_format, "g",
+              "Floating-point format, one of: \"e\", \"f\", or \"g\"");
 DEFINE_bool(show_weight_one, false,
             "Print/draw arc weights and final weights equal to Weight::One()");
 DEFINE_string(title, "", "Set figure title");
@@ -44,8 +38,9 @@ DEFINE_bool(allow_negative_labels, false,
 
 int main(int argc, char **argv) {
   namespace s = fst::script;
-  using fst::ostream;
+  using fst::script::FstClass;
   using fst::SymbolTable;
+  using fst::SymbolTableTextOptions;
 
   string usage = "Prints out binary FSTs in dot text format.\n\n  Usage: ";
   usage += argv[0];
@@ -58,56 +53,56 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  string in_name = (argc > 1 && strcmp(argv[1], "-") != 0) ? argv[1] : "";
+  const string in_name = (argc > 1 && strcmp(argv[1], "-") != 0) ? argv[1] : "";
 
-  s::FstClass *fst = s::FstClass::Read(in_name);
+  std::unique_ptr<FstClass> fst(FstClass::Read(in_name));
   if (!fst) return 1;
 
-  ostream *ostrm = &cout;
   string dest = "stdout";
+  std::ofstream fstrm;
   if (argc == 3) {
-    dest = argv[2];
-    ostrm = new fst::ofstream(argv[2]);
-    if (!*ostrm) {
+    fstrm.open(argv[2]);
+    if (!fstrm) {
       LOG(ERROR) << argv[0] << ": Open failed, file = " << argv[2];
       return 1;
     }
+    dest = argv[2];
   }
-  ostrm->precision(FLAGS_precision);
+  std::ostream &ostrm = fstrm.is_open() ? fstrm : std::cout;
 
-  const SymbolTable *isyms = 0, *osyms = 0, *ssyms = 0;
+  const SymbolTableTextOptions opts(FLAGS_allow_negative_labels);
 
-  fst::SymbolTableTextOptions opts;
-  opts.allow_negative = FLAGS_allow_negative_labels;
-
+  std::unique_ptr<const SymbolTable> isyms;
   if (!FLAGS_isymbols.empty() && !FLAGS_numeric) {
-    isyms = SymbolTable::ReadText(FLAGS_isymbols, opts);
-    if (!isyms) exit(1);
+    isyms.reset(SymbolTable::ReadText(FLAGS_isymbols, opts));
+    if (!isyms) return 1;
   }
 
+  std::unique_ptr<const SymbolTable> osyms;
   if (!FLAGS_osymbols.empty() && !FLAGS_numeric) {
-    osyms = SymbolTable::ReadText(FLAGS_osymbols, opts);
-    if (!osyms) exit(1);
+    osyms.reset(SymbolTable::ReadText(FLAGS_osymbols, opts));
+    if (!osyms) return 1;
   }
 
+  std::unique_ptr<const SymbolTable> ssyms;
   if (!FLAGS_ssymbols.empty() && !FLAGS_numeric) {
-    ssyms = SymbolTable::ReadText(FLAGS_ssymbols);
-    if (!ssyms) exit(1);
+    ssyms.reset(SymbolTable::ReadText(FLAGS_ssymbols));
+    if (!ssyms) return 1;
   }
 
-  if (!isyms && !FLAGS_numeric)
-    isyms = fst->InputSymbols();
-  if (!osyms && !FLAGS_numeric)
-    osyms = fst->OutputSymbols();
+  if (!isyms && !FLAGS_numeric && fst->InputSymbols()) {
+    isyms.reset(fst->InputSymbols()->Copy());
+  }
 
-  s::DrawFst(*fst, isyms, osyms, ssyms,  FLAGS_acceptor,
-             FLAGS_title, FLAGS_width, FLAGS_height,
-             FLAGS_portrait, FLAGS_vertical,
-             FLAGS_ranksep, FLAGS_nodesep,
-             FLAGS_fontsize, FLAGS_precision,
-             FLAGS_show_weight_one, ostrm, dest);
+  if (!osyms && !FLAGS_numeric && fst->OutputSymbols()) {
+    osyms.reset(fst->OutputSymbols()->Copy());
+  }
 
-  if (ostrm != &cout)
-    delete ostrm;
+  s::DrawFst(*fst, isyms.get(), osyms.get(), ssyms.get(), FLAGS_acceptor,
+             FLAGS_title, FLAGS_width, FLAGS_height, FLAGS_portrait,
+             FLAGS_vertical, FLAGS_ranksep, FLAGS_nodesep, FLAGS_fontsize,
+             FLAGS_precision, FLAGS_float_format, FLAGS_show_weight_one,
+             &ostrm, dest);
+
   return 0;
 }

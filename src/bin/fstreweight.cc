@@ -1,25 +1,15 @@
-// fstreweight.cc
-
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// See www.openfst.org for extensive documentation on this weighted
+// finite-state transducer library.
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// Copyright 2005-2010 Google, Inc.
-// Author: allauzen@google.com (Cyril Allauzen)
-// Modified: jpr@google.com (Jake Ratkiewicz) to use FstClass
-//
-// \file
 // Reweights an FST.
-//
 
+#include <cstring>
+
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <fst/script/getters.h>
 #include <fst/script/reweight.h>
 #include <fst/script/text-io.h>
 
@@ -27,8 +17,8 @@ DEFINE_bool(to_final, false, "Push/reweight to final (vs. to initial) states");
 
 int main(int argc, char **argv) {
   namespace s = fst::script;
-  using fst::script::FstClass;
   using fst::script::MutableFstClass;
+  using fst::script::WeightClass;
 
   string usage = "Reweights an FST.\n\n  Usage: ";
   usage += argv[0];
@@ -41,23 +31,21 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  string in_fname = argv[1];
-  string potentials_fname = argv[2];
-  string out_fname = argc > 3 ? argv[3] : "";
+  const string in_name = argv[1];
+  const string potentials_name = argv[2];
+  const string out_name = argc > 3 ? argv[3] : "";
 
-  MutableFstClass *fst = MutableFstClass::Read(in_fname, true);
+  std::unique_ptr<MutableFstClass> fst(MutableFstClass::Read(in_name, true));
   if (!fst) return 1;
 
-  vector<s::WeightClass> potential;
-  if (!s::ReadPotentials(fst->WeightType(), potentials_fname, &potential))
+  std::vector<WeightClass> potential;
+  if (!s::ReadPotentials(fst->WeightType(), potentials_name, &potential)) {
     return 1;
+  }
 
-  fst::ReweightType reweight_type = FLAGS_to_final ?
-      fst::REWEIGHT_TO_FINAL :
-      fst::REWEIGHT_TO_INITIAL;
+  s::Reweight(fst.get(), potential, s::GetReweightType(FLAGS_to_final));
 
-  s::Reweight(fst, potential, reweight_type);
-  fst->Write(out_fname);
+  fst->Write(out_name);
 
   return 0;
 }

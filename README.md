@@ -1,4 +1,6 @@
-openfstwin-1.4.1
+openfstwin-1.6.2
 ================
 
-OpenFst 1.4.1 for Windows and Visual Studio 2013
+OpenFst 1.6.2 for Windows and Visual Studio 2017
+
+(does not compile yet)
