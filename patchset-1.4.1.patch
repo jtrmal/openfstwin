@@ -1,0 +1,1654 @@
+diff --git a/config.guess b/config.guess
+old mode 100644
+new mode 100755
+diff --git a/config.sub b/config.sub
+old mode 100644
+new mode 100755
+diff --git a/configure b/configure
+old mode 100644
+new mode 100755
+diff --git a/depcomp b/depcomp
+old mode 100644
+new mode 100755
+diff --git a/install-sh b/install-sh
+old mode 100644
+new mode 100755
+diff --git a/missing b/missing
+old mode 100644
+new mode 100755
+diff --git a/src/extensions/far/main.cc b/src/extensions/far/main.cc
+index a33daf6..855def6 100644
+--- a/src/extensions/far/main.cc
++++ b/src/extensions/far/main.cc
+@@ -115,12 +115,4 @@ string LoadArcTypeFromFst(const string &fst_fname) {
+   return hdr.ArcType();
+ }
+ 
+-#ifdef _MSC_VER //AddedPD
+-std::string basename(const std::string &filename) {
+-	size_t p = filename.find_last_of(kFileSeperator);
+-	return p == string::npos ? filename
+-		: filename.substr(p + 1, filename.size() - p);
+-}
+-#endif
+-
+ }  // namespace fst
+diff --git a/src/include/fst/compat.h b/src/include/fst/compat.h
+index a5e3155..04d1298 100644
+--- a/src/include/fst/compat.h
++++ b/src/include/fst/compat.h
+@@ -20,38 +20,7 @@
+ #ifndef FST_LIB_COMPAT_H__
+ #define FST_LIB_COMPAT_H__
+ 
+-#ifdef _MSC_VER //AddedPD
+-#include <BaseTsd.h>
+-#include <intrin.h>
+-#include <bitset>
+-
+-typedef SSIZE_T ssize_t;
+-#define snprintf _snprintf
+-#define strtoll _strtoi64
+-#define __builtin_popcount __popcnt
+-
+-unsigned long long __builtin_ctzll(unsigned long long x);
+-
+-unsigned long long  __builtin_popcountll(unsigned long long  w);
+-
+-#ifndef OPENFSTEXPORT
+-#ifdef _DEBUG
+-#ifdef _M_X64
+-#pragma comment (lib, "openfst64-gd.lib")
+-#else
+-#pragma comment (lib, "openfst-gd.lib")
+-#endif
+-#else
+-#ifdef _M_X64
+-#pragma comment (lib, "openfst64.lib")
+-#else
+-#pragma comment (lib, "openfst.lib")
+-#endif		
+-#endif
+-#endif
+-#else
+ #include <dlfcn.h>
+-#endif
+ 
+ #include <climits>
+ #include <cstdlib>
+@@ -78,7 +47,7 @@ using std::cerr;
+ using std::endl;
+ using std::string;
+ 
+-void OPENFSTDLL FailedNewHandler();
++void FailedNewHandler();
+ 
+ namespace fst {
+ 
+diff --git a/src/include/fst/config.h b/src/include/fst/config.h
+index c85639c..046b49c 100644
+--- a/src/include/fst/config.h
++++ b/src/include/fst/config.h
+@@ -1,4 +1,12 @@
+-#ifdef _MSC_VER 
+-#pragma warning(disable:4018 4244 4996 4099 4503 4800 4305 4355 4396 4715 4180 4244 4224 4267 4291 4521)
+-#define WIN32_LEAN_AND_MEAN
+-#endif
++/* src/include/fst/config.h.  Generated from config.h.in by configure.  */
++// OpenFst config file 
++
++/* Define to 1 if you have the ICU library. */
++/* #undef HAVE_ICU */
++
++/* Define to 1 if the system has the type `std::tr1::hash<long long
++   unsigned>'. */
++#define HAVE_STD__TR1__HASH_LONG_LONG_UNSIGNED_ 1
++
++/* Define to 1 if the system has the type `__gnu_cxx::slist<int>'. */
++#define HAVE___GNU_CXX__SLIST_INT_ 1
+diff --git a/src/include/fst/extensions/far/compile-strings.h b/src/include/fst/extensions/far/compile-strings.h
+index 6f0c25f..8a02647 100644
+--- a/src/include/fst/extensions/far/compile-strings.h
++++ b/src/include/fst/extensions/far/compile-strings.h
+@@ -20,10 +20,7 @@
+ #ifndef FST_EXTENSIONS_FAR_COMPILE_STRINGS_H_
+ #define FST_EXTENSIONS_FAR_COMPILE_STRINGS_H_
+ 
+-#ifndef _MSC_VER //ChangedPD
+ #include <libgen.h>
+-#endif
+-
+ #include <string>
+ #include <vector>
+ using std::vector;
+diff --git a/src/include/fst/extensions/far/create.h b/src/include/fst/extensions/far/create.h
+index 7aa4d3f..edb31e7 100644
+--- a/src/include/fst/extensions/far/create.h
++++ b/src/include/fst/extensions/far/create.h
+@@ -25,9 +25,7 @@
+ #ifndef FST_EXTENSIONS_FAR_CREATE_H__
+ #define FST_EXTENSIONS_FAR_CREATE_H__
+ 
+-#ifndef _MSC_VER //ChangedPD
+ #include <libgen.h>
+-#endif
+ #include <string>
+ #include <vector>
+ using std::vector;
+diff --git a/src/include/fst/extensions/far/farscript.h b/src/include/fst/extensions/far/farscript.h
+index c73e192..cfd9167 100644
+--- a/src/include/fst/extensions/far/farscript.h
++++ b/src/include/fst/extensions/far/farscript.h
+@@ -59,7 +59,7 @@ struct FarCompileStringsArgs {
+   const string &key_prefix;
+   const string &key_suffix;
+ 
+-OPENFSTDLL FarCompileStringsArgs(const vector<string> &in_fnames,
++  FarCompileStringsArgs(const vector<string> &in_fnames,
+                         const string &out_fname,
+                         const string &fst_type,
+                         const FarType &far_type,
+@@ -93,7 +93,7 @@ void FarCompileStrings(FarCompileStringsArgs *args) {
+       args->key_prefix, args->key_suffix);
+ }
+ 
+-void OPENFSTDLL FarCompileStrings(
++void FarCompileStrings(
+     const vector<string> &in_fnames,
+     const string &out_fname,
+     const string &arc_type,
+@@ -142,7 +142,7 @@ void FarCreate(FarCreateArgs *args) {
+                           args->key_prefix, args->key_suffix);
+ }
+ 
+-void OPENFSTDLL FarCreate(const vector<string> &in_fnames,
++void FarCreate(const vector<string> &in_fnames,
+                const string &out_fname,
+                const string &arc_type,
+                const int32 generate_keys,
+@@ -182,7 +182,7 @@ void FarExtract(FarExtractArgs *args) {
+       args->arg7);
+ }
+ 
+-void OPENFSTDLL FarExtract(const vector<string> &ifilenames,
++void FarExtract(const vector<string> &ifilenames,
+                 const string &arc_type,
+                 int32 generate_filenames,
+                 const string &keys,
+@@ -199,7 +199,7 @@ void FarInfo(FarInfoArgs *args) {
+   fst::FarInfo<Arc>(args->arg1, args->arg2, args->arg3, args->arg4);
+ }
+ 
+-void OPENFSTDLL FarInfo(const vector<string> &filenames,
++void FarInfo(const vector<string> &filenames,
+              const string &arc_type,
+              const string &begin_key,
+              const string &end_key,
+@@ -244,7 +244,7 @@ void FarPrintStrings(FarPrintStringsArgs *args) {
+ }
+ 
+ 
+-void OPENFSTDLL FarPrintStrings(const vector<string> &ifilenames,
++void FarPrintStrings(const vector<string> &ifilenames,
+                      const string &arc_type,
+                      const FarEntryType entry_type,
+                      const FarTokenType token_type,
+diff --git a/src/include/fst/extensions/far/main.h b/src/include/fst/extensions/far/main.h
+index c5166c8..00ccfef 100644
+--- a/src/include/fst/extensions/far/main.h
++++ b/src/include/fst/extensions/far/main.h
+@@ -21,27 +21,23 @@
+ 
+ #ifndef FST_EXTENSIONS_FAR_MAIN_H__
+ #define FST_EXTENSIONS_FAR_MAIN_H__
+-#include <string>
++
+ #include <fst/extensions/far/far.h>
+ 
+ namespace fst {
+ 
+-FarEntryType OPENFSTDLL StringToFarEntryType(const string &s);
+-FarTokenType OPENFSTDLL StringToFarTokenType(const string &s);
++FarEntryType StringToFarEntryType(const string &s);
++FarTokenType StringToFarTokenType(const string &s);
+ 
+ // Return the 'FarType' value corresponding to a far type name.
+-FarType OPENFSTDLL FarTypeFromString(const string &str);
++FarType FarTypeFromString(const string &str);
+ 
+ // Return the textual name  corresponding to a 'FarType;.
+-string OPENFSTDLL FarTypeToString(FarType type);
++string FarTypeToString(FarType type);
+ 
+-string OPENFSTDLL LoadArcTypeFromFar(const string& far_fname);
+-string OPENFSTDLL LoadArcTypeFromFst(const string& far_fname);
++string LoadArcTypeFromFar(const string& far_fname);
++string LoadArcTypeFromFst(const string& far_fname);
+ 
+-#ifdef _MSC_VER //AddedPD
+-const char kFileSeperator = '\\';
+-std::string OPENFSTDLL basename(const std::string &filename);
+-#endif
+ }  // namespace fst
+ 
+ #endif  // FST_EXTENSIONS_FAR_MAIN_H__
+diff --git a/src/include/fst/extensions/far/stlist.h b/src/include/fst/extensions/far/stlist.h
+index 9dbd2ab..ff3d98b 100644
+--- a/src/include/fst/extensions/far/stlist.h
++++ b/src/include/fst/extensions/far/stlist.h
+@@ -298,7 +298,7 @@ bool ReadSTListHeader(const string &filename, H *header) {
+   return true;
+ }
+ 
+-bool OPENFSTDLL  IsSTList(const string &filename);
++bool IsSTList(const string &filename);
+ 
+ }  // namespace fst
+ 
+diff --git a/src/include/fst/extensions/far/sttable.h b/src/include/fst/extensions/far/sttable.h
+index a142e34..fb1a171 100644
+--- a/src/include/fst/extensions/far/sttable.h
++++ b/src/include/fst/extensions/far/sttable.h
+@@ -364,7 +364,7 @@ bool ReadSTTableHeader(const string &filename, H *header) {
+   return true;
+ }
+ 
+-bool OPENFSTDLL IsSTTable(const string &filename);
++bool IsSTTable(const string &filename);
+ 
+ }  // namespace fst
+ 
+diff --git a/src/include/fst/extensions/linear/linearscript.h b/src/include/fst/extensions/linear/linearscript.h
+index 286dc97..487c00c 100644
+--- a/src/include/fst/extensions/linear/linearscript.h
++++ b/src/include/fst/extensions/linear/linearscript.h
+@@ -43,8 +43,8 @@ typedef args::Package<const string &, const string &, const string &, char **,
+                       int, const string &, const string &, const string &,
+                       const string &> LinearCompileArgs;
+ 
+-bool OPENFSTDLL ValidateDelimiter();
+-bool OPENFSTDLL ValidateEmptySymbol();
++bool ValidateDelimiter();
++bool ValidateEmptySymbol();
+ 
+ // Returns the proper label given the symbol. For symbols other than
+ // `FLAGS_start_symbol` or `FLAGS_end_symbol`, looks up the symbol
+@@ -332,7 +332,7 @@ void LinearCompileTpl(LinearCompileArgs *args) {
+   if (!save_osymbols.empty()) osyms.WriteText(save_osymbols);
+ }
+ 
+-void OPENFSTDLL LinearCompile(const string &arc_type, const string &epsilon_symbol,
++void LinearCompile(const string &arc_type, const string &epsilon_symbol,
+                    const string &unknown_symbol, const string &vocab,
+                    char **models, int models_len, const string &out,
+                    const string &save_isymbols, const string &save_fsymbols,
+diff --git a/src/include/fst/extensions/pdt/pdtscript.h b/src/include/fst/extensions/pdt/pdtscript.h
+index a1a3f1f..84bb27e 100644
+--- a/src/include/fst/extensions/pdt/pdtscript.h
++++ b/src/include/fst/extensions/pdt/pdtscript.h
+@@ -72,7 +72,7 @@ void PdtCompose(PdtComposeArgs *args) {
+   }
+ }
+ 
+-void OPENFSTDLL PdtCompose(const FstClass & ifst1,
++void PdtCompose(const FstClass & ifst1,
+                 const FstClass & ifst2,
+                 const vector<pair<int64, int64> > &parens,
+                 MutableFstClass *ofst,
+@@ -112,11 +112,11 @@ void PdtExpand(PdtExpandArgs *args) {
+              *(args->arg4.weight_threshold.GetWeight<typename Arc::Weight>())));
+ }
+ 
+-void OPENFSTDLL PdtExpand(const FstClass &ifst,
++void PdtExpand(const FstClass &ifst,
+                const vector<pair<int64, int64> > &parens,
+                MutableFstClass *ofst, const PdtExpandOptions &opts);
+ 
+-void OPENFSTDLL PdtExpand(const FstClass &ifst,
++void PdtExpand(const FstClass &ifst,
+                const vector<pair<int64, int64> > &parens,
+                MutableFstClass *ofst, bool connect);
+ 
+@@ -152,7 +152,7 @@ void PdtReplace(PdtReplaceArgs *args) {
+   }
+ }
+ 
+-void OPENFSTDLL PdtReplace(const vector<pair<int64, const FstClass*> > &fst_tuples,
++void PdtReplace(const vector<pair<int64, const FstClass*> > &fst_tuples,
+                 MutableFstClass *ofst,
+                 vector<pair<int64, int64> > *parens,
+                 const int64 &root);
+@@ -177,7 +177,7 @@ void PdtReverse(PdtReverseArgs *args) {
+   Reverse(fst, parens, ofst);
+ }
+ 
+-void OPENFSTDLL PdtReverse(const FstClass &ifst,
++void PdtReverse(const FstClass &ifst,
+                 const vector<pair<int64, int64> > &parens,
+                 MutableFstClass *ofst);
+ 
+@@ -243,7 +243,7 @@ void PdtShortestPath(PdtShortestPathArgs *args) {
+   }
+ }
+ 
+-void OPENFSTDLL PdtShortestPath(const FstClass &ifst,
++void PdtShortestPath(const FstClass &ifst,
+                      const vector<pair<int64, int64> > &parens,
+                      MutableFstClass *ofst,
+                      const PdtShortestPathOptions &opts =
+@@ -267,7 +267,7 @@ void PrintPdtInfo(PrintPdtInfoArgs *args) {
+   PrintPdtInfo(pdtinfo);
+ }
+ 
+-void OPENFSTDLL PrintPdtInfo(const FstClass &ifst,
++void PrintPdtInfo(const FstClass &ifst,
+                   const vector<pair<int64, int64> > &parens);
+ 
+ }  // namespace script
+diff --git a/src/include/fst/flags.h b/src/include/fst/flags.h
+index 5d03ebd..b3bb66c 100644
+--- a/src/include/fst/flags.h
++++ b/src/include/fst/flags.h
+@@ -30,17 +30,7 @@
+ #include <fst/lock.h>
+ 
+ using std::string;
+-#ifdef _MSC_VER //Added Paul Dixon 04/09/10
+-#define strtoll _strtoi64
+-#define atoll atol
+-#ifdef OPENFSTEXPORT
+-#define  OPENFSTDLL  __declspec(dllexport) 
+-#else
+-#define  OPENFSTDLL __declspec(dllimport)
+-#endif
+-#else
+-#define OPENFSTDLL  
+-#endif
++
+ //
+ // FLAGS USAGE:
+ //
+@@ -60,11 +50,11 @@ using std::string;
+ // ShowUsage() can be used to print out command and flag usage.
+ //
+ 
+-#define DECLARE_bool(name) OPENFSTDLL extern bool FLAGS_ ## name
+-#define DECLARE_string(name) OPENFSTDLL extern string FLAGS_ ## name
+-#define DECLARE_int32(name) OPENFSTDLL extern int32 FLAGS_ ## name
+-#define DECLARE_int64(name) OPENFSTDLL extern int64 FLAGS_ ## name
+-#define DECLARE_double(name) OPENFSTDLL extern double FLAGS_ ## name
++#define DECLARE_bool(name) extern bool FLAGS_ ## name
++#define DECLARE_string(name) extern string FLAGS_ ## name
++#define DECLARE_int32(name) extern int32 FLAGS_ ## name
++#define DECLARE_int64(name) extern int64 FLAGS_ ## name
++#define DECLARE_double(name) extern double FLAGS_ ## name
+ 
+ template <typename T>
+ struct FlagDescription {
+@@ -188,12 +178,11 @@ class FlagRegister {
+     return strm.str();
+   }
+ 
+-  OPENFSTDLL static fst::FstOnceType register_init_;   // ensures only called once
+-  OPENFSTDLL static fst::Mutex* register_lock_;        // multithreading lock
+-  OPENFSTDLL static FlagRegister<T> *register_;
++  static fst::FstOnceType register_init_;   // ensures only called once
++  static fst::Mutex* register_lock_;        // multithreading lock
++  static FlagRegister<T> *register_;
+ };
+ 
+-#ifdef OPENFSTEXPORT
+ template <class T>
+ fst::FstOnceType FlagRegister<T>::register_init_ = fst::FST_ONCE_INIT;
+ 
+@@ -202,7 +191,7 @@ fst::Mutex *FlagRegister<T>::register_lock_ = 0;
+ 
+ template <class T>
+ FlagRegister<T> *FlagRegister<T>::register_ = 0;
+-#endif
++
+ 
+ template <typename T>
+ class FlagRegisterer {
+@@ -237,7 +226,7 @@ class FlagRegisterer {
+ // Temporary directory
+ DECLARE_string(tmpdir);
+ 
+-void OPENFSTDLL SetFlags(const char *usage, int *argc, char ***argv, bool remove_flags,
++void SetFlags(const char *usage, int *argc, char ***argv, bool remove_flags,
+               const char *src = "");
+ 
+ #define SET_FLAGS(usage, argc, argv, rmflags) \
+@@ -248,6 +237,6 @@ inline void InitFst(const char *usage, int *argc, char ***argv, bool rmflags) {
+   return SetFlags(usage, argc, argv, rmflags);
+ }
+ 
+-void OPENFSTDLL ShowUsage(bool long_usage = true);
++void ShowUsage(bool long_usage = true);
+ 
+ #endif  // FST_LIB_FLAGS_H__
+diff --git a/src/include/fst/fst-decl.h b/src/include/fst/fst-decl.h
+index f9c053a..d8f4b3d 100644
+--- a/src/include/fst/fst-decl.h
++++ b/src/include/fst/fst-decl.h
+@@ -57,7 +57,7 @@ template <class A> class Fst;
+ template <class A> class MutableFst;
+ template <class A, class M = std::allocator<A> > class VectorState;
+ template <class A, class S = VectorState<A> > class VectorFst;
+-template <class A, class P> class DefaultReplaceStateTable;
++
+ template <class A> class DefaultCacheStore;
+ template <class A, class C> class ArcSortFst;
+ template <class A> class ClosureFst;
+@@ -71,7 +71,7 @@ template <class A, class B, class C> class ArcMapFst;
+ template <class A> class ProjectFst;
+ template <class A, class B, class S> class RandGenFst;
+ template <class A> class RelabelFst;
+-template <class A, class T = DefaultReplaceStateTable<A>, class C = DefaultCacheStore<A> > class ReplaceFst;
++template <class A, class T, class C = DefaultCacheStore<A> > class ReplaceFst;
+ template <class A> class RmEpsilonFst;
+ template <class A> class UnionFst;
+ 
+@@ -83,7 +83,7 @@ template <class A> class UnweightedAcceptorCompactor;
+ template <class A> class UnweightedCompactor;
+ template <class A> class WeightedStringCompactor;
+ 
+-
++template <class A, class P> class DefaultReplaceStateTable;
+ 
+ typedef ConstFst<StdArc> StdConstFst;
+ typedef ExpandedFst<StdArc> StdExpandedFst;
+diff --git a/src/include/fst/fst.h b/src/include/fst/fst.h
+index d2b4f3f..352bca6 100644
+--- a/src/include/fst/fst.h
++++ b/src/include/fst/fst.h
+@@ -46,14 +46,14 @@ DECLARE_bool(fst_align);
+ 
+ namespace fst {
+ 
+-bool OPENFSTDLL IsFstHeader(istream &, const string &);
++bool IsFstHeader(istream &, const string &);
+ 
+ class FstHeader;
+ template <class A> class StateIteratorData;
+ template <class A> class ArcIteratorData;
+ template <class A> class MatcherBase;
+ 
+-struct  FstReadOptions {
++struct FstReadOptions {
+   // FileReadMode(s) are advisory, there are many conditions than prevent a
+   // file from being mapped, READ mode will be selected in these cases with
+   // a warning indicating why it was chosen.
+@@ -70,7 +70,7 @@ struct  FstReadOptions {
+   bool read_isymbols;           // Read isymbols, if any, default true
+   bool read_osymbols;           // Read osymbols, if any, default true
+ 
+-  explicit OPENFSTDLL FstReadOptions(const string& src = "<unspecified>",
++  explicit FstReadOptions(const string& src = "<unspecified>",
+                           const FstHeader *hdr = 0,
+                           const SymbolTable* isym = 0,
+                           const SymbolTable* osym = 0);
+@@ -83,7 +83,7 @@ struct  FstReadOptions {
+   static FileReadMode ReadMode(const string &mode);
+ };
+ 
+-struct  FstWriteOptions {
++struct FstWriteOptions {
+   string source;                 // Where you're writing to
+   bool write_header;             // Write the header?
+   bool write_isymbols;           // Write input symbols?
+@@ -91,7 +91,7 @@ struct  FstWriteOptions {
+   bool align;                    // Write data aligned where appropriate;
+                                  // this may fail on pipes
+ 
+-  explicit OPENFSTDLL FstWriteOptions(const string& src = "<unspecifed>",
++  explicit FstWriteOptions(const string& src = "<unspecifed>",
+                            bool hdr = true, bool isym = true,
+                            bool osym = true, bool alig = FLAGS_fst_align)
+       : source(src), write_header(hdr),
+@@ -111,7 +111,7 @@ class FstHeader {
+     IS_ALIGNED   = 0x4,          // Memory-aligned (where appropriate)
+   } Flags;
+ 
+-  OPENFSTDLL FstHeader() : version_(0), flags_(0), properties_(0), start_(-1),
++  FstHeader() : version_(0), flags_(0), properties_(0), start_(-1),
+                 numstates_(0), numarcs_(0) {}
+   const string &FstType() const { return fsttype_; }
+   const string &ArcType() const { return arctype_; }
+@@ -131,8 +131,8 @@ class FstHeader {
+   void SetNumStates(int64 numstates) { numstates_ = numstates; }
+   void SetNumArcs(int64 numarcs) { numarcs_ = numarcs; }
+ 
+-  bool OPENFSTDLL Read(istream &strm, const string &source, bool rewind = false);
+-  bool OPENFSTDLL Write(ostream &strm, const string &source) const;
++  bool Read(istream &strm, const string &source, bool rewind = false);
++  bool Write(ostream &strm, const string &source) const;
+ 
+  private:
+ 
+diff --git a/src/include/fst/generic-register.h b/src/include/fst/generic-register.h
+index 9223345..c916f76 100644
+--- a/src/include/fst/generic-register.h
++++ b/src/include/fst/generic-register.h
+@@ -76,13 +76,15 @@ class GenericRegister {
+   virtual EntryType LoadEntryFromSharedObject(const KeyType &key) const {
+ #ifdef FST_NO_DYNAMIC_LINKING
+     return EntryType();
+-#else //Added PD
++#else
+     string so_filename = ConvertKeyToSoFilename(key);
++
+     void *handle = dlopen(so_filename.c_str(), RTLD_LAZY);
+     if (handle == 0) {
+       LOG(ERROR) << "GenericRegister::GetEntry : " << dlerror();
+       return EntryType();
+     }
++
+     // We assume that the DSO constructs a static object in its global
+     // scope that does the registration. Thus we need only load it, not
+     // call any methods.
+@@ -120,14 +122,13 @@ class GenericRegister {
+     register_ = new RegisterType;
+   }
+ 
+-  static OPENFSTDLL FstOnceType register_init_;
+-  static OPENFSTDLL Mutex *register_lock_;
+-  static OPENFSTDLL RegisterType *register_;
++  static FstOnceType register_init_;
++  static Mutex *register_lock_;
++  static RegisterType *register_;
+ 
+   RegisterMapType register_table_;
+ };
+ 
+-#ifdef OPENFSTEXPORT //ChangedPD
+ template<class KeyType, class EntryType, class RegisterType>
+ FstOnceType GenericRegister<KeyType, EntryType,
+                                RegisterType>::register_init_ = FST_ONCE_INIT;
+@@ -137,7 +138,6 @@ Mutex *GenericRegister<KeyType, EntryType, RegisterType>::register_lock_ = 0;
+ 
+ template<class KeyType, class EntryType, class RegisterType>
+ RegisterType *GenericRegister<KeyType, EntryType, RegisterType>::register_ = 0;
+-#endif
+ 
+ //
+ // GENERIC REGISTRATION
+diff --git a/src/include/fst/mapped-file.h b/src/include/fst/mapped-file.h
+index 3a7f1eb..449fa44 100644
+--- a/src/include/fst/mapped-file.h
++++ b/src/include/fst/mapped-file.h
+@@ -17,10 +17,8 @@
+ #ifndef FST_LIB_MAPPED_FILE_H_
+ #define FST_LIB_MAPPED_FILE_H_
+ 
+-#ifndef _MSC_VER //AddedPD
+ #include <unistd.h>
+ #include <sys/mman.h>
+-#endif
+ 
+ #include <fst/compat.h>
+ #include <iostream>
+@@ -68,15 +66,15 @@ class MappedFile {
+   // Creates a MappedFile object with a new[]'ed block of memory of size.
+   // Align can be used to specify a desired block alignment.
+   // RECOMMENDED FOR INTERNAL USE ONLY, may change in future releases.
+-  static OPENFSTDLL MappedFile* Allocate(size_t size, int align = kArchAlignment);
++  static MappedFile* Allocate(size_t size, int align = kArchAlignment);
+ 
+   // Creates a MappedFile object pointing to a borrowed reference to data.
+   // This block of memory is not owned by the MappedFile object and will not
+   // be freed.
+   // RECOMMENDED FOR INTERNAL USE ONLY, may change in future releases.
+   static MappedFile* Borrow(void *data);
+-  
+-  static OPENFSTDLL const int kArchAlignment;
++
++  static const int kArchAlignment;
+ 
+  private:
+   explicit MappedFile(const MemoryRegion &region);
+diff --git a/src/include/fst/matcher-fst.h b/src/include/fst/matcher-fst.h
+index 9183a6c..63bb0bf 100644
+--- a/src/include/fst/matcher-fst.h
++++ b/src/include/fst/matcher-fst.h
+@@ -316,8 +316,8 @@ typedef MatcherFst<ConstFst<LogArc>,
+ 
+ 
+ // Label look-ahead matchers
+-extern OPENFSTDLL const char ilabel_lookahead_fst_type[];
+-extern OPENFSTDLL const char olabel_lookahead_fst_type[];
++extern const char ilabel_lookahead_fst_type[];
++extern const char olabel_lookahead_fst_type[];
+ 
+ static const uint32 ilabel_lookahead_flags = kInputLookAheadMatcher |
+     kLookAheadWeight | kLookAheadPrefix |
+diff --git a/src/include/fst/properties.h b/src/include/fst/properties.h
+index a831ea8..9d29ba6 100644
+--- a/src/include/fst/properties.h
++++ b/src/include/fst/properties.h
+@@ -320,41 +320,41 @@ const uint64 kFstProperties = kBinaryProperties | kTrinaryProperties;
+ 
+ // Below are functions for getting property bit vectors when executing
+ // mutating fst operations.
+-OPENFSTDLL inline uint64 SetStartProperties(uint64 inprops);
++inline uint64 SetStartProperties(uint64 inprops);
+ template <typename Weight>
+ uint64 SetFinalProperties(uint64 inprops, Weight old_weight,
+                           Weight new_weight);
+-OPENFSTDLL inline uint64 AddStateProperties(uint64 inprops);
++inline uint64 AddStateProperties(uint64 inprops);
+ template <typename A>
+ uint64 AddArcProperties(uint64 inprops, typename A::StateId s, const A &arc,
+                            const A *prev_arc);
+-OPENFSTDLL inline uint64 DeleteStatesProperties(uint64 inprops);
+-OPENFSTDLL inline uint64 DeleteAllStatesProperties(uint64 inprops, uint64 staticProps);
+-OPENFSTDLL inline uint64 DeleteArcsProperties(uint64 inprops);
+-
+-OPENFSTDLL uint64 ClosureProperties(uint64 inprops, bool star, bool delayed = false);
+-OPENFSTDLL uint64 ComplementProperties(uint64 inprops);
+-OPENFSTDLL uint64 ComposeProperties(uint64 inprops1, uint64 inprops2);
+-OPENFSTDLL uint64 ConcatProperties(uint64 inprops1, uint64 inprops2,
++inline uint64 DeleteStatesProperties(uint64 inprops);
++inline uint64 DeleteAllStatesProperties(uint64 inprops, uint64 staticProps);
++inline uint64 DeleteArcsProperties(uint64 inprops);
++
++uint64 ClosureProperties(uint64 inprops, bool star, bool delayed = false);
++uint64 ComplementProperties(uint64 inprops);
++uint64 ComposeProperties(uint64 inprops1, uint64 inprops2);
++uint64 ConcatProperties(uint64 inprops1, uint64 inprops2,
+                         bool delayed = false);
+-OPENFSTDLL uint64 DeterminizeProperties(uint64 inprops, bool has_subsequential_label);
+-OPENFSTDLL uint64 FactorWeightProperties(uint64 inprops);
+-OPENFSTDLL uint64 InvertProperties(uint64 inprops);
+-OPENFSTDLL uint64 ProjectProperties(uint64 inprops, bool project_input);
+-OPENFSTDLL uint64 RandGenProperties(uint64 inprops, bool weighted);
+-OPENFSTDLL uint64 RelabelProperties(uint64 inprops);
+-OPENFSTDLL uint64 ReplaceProperties(const vector<uint64>& inprops,
++uint64 DeterminizeProperties(uint64 inprops, bool has_subsequential_label);
++uint64 FactorWeightProperties(uint64 inprops);
++uint64 InvertProperties(uint64 inprops);
++uint64 ProjectProperties(uint64 inprops, bool project_input);
++uint64 RandGenProperties(uint64 inprops, bool weighted);
++uint64 RelabelProperties(uint64 inprops);
++uint64 ReplaceProperties(const vector<uint64>& inprops,
+                          ssize_t root,
+                          bool epsilon_on_call,
+                          bool epsilon_on_return,
+                          bool replace_transducer,
+                          bool no_empty_fst);
+-OPENFSTDLL uint64 ReverseProperties(uint64 inprops, bool has_superinitial);
+-OPENFSTDLL uint64 ReweightProperties(uint64 inprops);
+-OPENFSTDLL uint64 RmEpsilonProperties(uint64 inprops, bool delayed = false);
+-OPENFSTDLL uint64 ShortestPathProperties(uint64 props);
+-OPENFSTDLL uint64 SynchronizeProperties(uint64 inprops);
+-OPENFSTDLL uint64 UnionProperties(uint64 inprops1, uint64 inprops2, bool delayed = false);
++uint64 ReverseProperties(uint64 inprops, bool has_superinitial);
++uint64 ReweightProperties(uint64 inprops);
++uint64 RmEpsilonProperties(uint64 inprops, bool delayed = false);
++uint64 ShortestPathProperties(uint64 props);
++uint64 SynchronizeProperties(uint64 inprops);
++uint64 UnionProperties(uint64 inprops1, uint64 inprops2, bool delayed = false);
+ 
+ // Definitions of inlined functions.
+ 
+diff --git a/src/include/fst/replace.h b/src/include/fst/replace.h
+index eb27991..36b7a7e 100644
+--- a/src/include/fst/replace.h
++++ b/src/include/fst/replace.h
+@@ -1122,8 +1122,8 @@ class ReplaceFstImpl : public CacheBaseImpl<typename C::State, C> {
+ //
+ // This class attaches interface to implementation and handles
+ // reference counting, delegating most methods to ImplToFst.
+-template <class A, class T,
+-          class C>
++template <class A, class T = DefaultReplaceStateTable<A>,
++          class C /* = DefaultCacheStore<A> */ >
+ class ReplaceFst : public ImplToFst< ReplaceFstImpl<A, T, C> > {
+  public:
+   friend class ArcIterator< ReplaceFst<A, T, C> >;
+@@ -1250,7 +1250,7 @@ class ArcIterator< ReplaceFst<A, T, C> > {
+     // If state is already cached, use cached arcs array.
+     if (fst_.GetImpl()->HasArcs(state_)) {
+       (fst_.GetImpl())
+-          ->CacheBaseImpl<typename C::State, C>::InitArcIterator(
++          ->template CacheBaseImpl<typename C::State, C>::InitArcIterator(
+               state_, &cache_data_);
+       num_arcs_ = cache_data_.narcs;
+       arcs_ = cache_data_.arcs;      // 'arcs_' is a ptr to the cached arcs.
+diff --git a/src/include/fst/script/arcsort.h b/src/include/fst/script/arcsort.h
+index 6e445b3..4277332 100644
+--- a/src/include/fst/script/arcsort.h
++++ b/src/include/fst/script/arcsort.h
+@@ -41,7 +41,7 @@ void ArcSort(ArcSortArgs *args) {
+   }
+ }
+ 
+-void OPENFSTDLL ArcSort(MutableFstClass *ofst, ArcSortType sort_type);
++void ArcSort(MutableFstClass *ofst, ArcSortType sort_type);
+ 
+ }  // namespace script
+ }  // namespace fst
+diff --git a/src/include/fst/script/closure.h b/src/include/fst/script/closure.h
+index 76949ad..93b5ec3 100644
+--- a/src/include/fst/script/closure.h
++++ b/src/include/fst/script/closure.h
+@@ -33,7 +33,7 @@ void Closure(ClosureArgs *args) {
+   Closure(fst, args->arg2);
+ }
+ 
+-void OPENFSTDLL Closure(MutableFstClass *ofst, ClosureType closure_type);
++void Closure(MutableFstClass *ofst, ClosureType closure_type);
+ 
+ }  // namespace script
+ }  // namespace fst
+diff --git a/src/include/fst/script/compile.h b/src/include/fst/script/compile.h
+index ba4fee3..bb6ea56 100644
+--- a/src/include/fst/script/compile.h
++++ b/src/include/fst/script/compile.h
+@@ -79,7 +79,7 @@ void CompileFst(FstCompileArgs *args) {
+   fst->Write(args->dest);
+ }
+ 
+-void OPENFSTDLL CompileFst(istream &istrm, const string &source, const string &dest,
++void CompileFst(istream &istrm, const string &source, const string &dest,
+                 const string &fst_type, const string &arc_type,
+                 const SymbolTable *isyms,
+                 const SymbolTable *osyms, const SymbolTable *ssyms,
+diff --git a/src/include/fst/script/compose.h b/src/include/fst/script/compose.h
+index 37f0c3c..96375f7 100644
+--- a/src/include/fst/script/compose.h
++++ b/src/include/fst/script/compose.h
+@@ -50,11 +50,11 @@ void Compose(ComposeArgs2 *args) {
+   Compose(ifst1, ifst2, ofst, args->arg4);
+ }
+ 
+-void OPENFSTDLL Compose(const FstClass &ifst1, const FstClass &ifst2,
++void Compose(const FstClass &ifst1, const FstClass &ifst2,
+              MutableFstClass *ofst,
+              const ComposeOptions &opts = fst::script::ComposeOptions());
+ 
+-void OPENFSTDLL Compose(const FstClass &ifst1, const FstClass &ifst2,
++void Compose(const FstClass &ifst1, const FstClass &ifst2,
+              MutableFstClass *ofst, ComposeFilter compose_filter);
+ 
+ }  // namespace script
+diff --git a/src/include/fst/script/concat.h b/src/include/fst/script/concat.h
+index 488bdbb..46c4407 100644
+--- a/src/include/fst/script/concat.h
++++ b/src/include/fst/script/concat.h
+@@ -43,8 +43,8 @@ void Concat(ConcatArgs2 *args) {
+   Concat(ifst, ofst);
+ }
+ 
+-void OPENFSTDLL Concat(MutableFstClass *ofst, const FstClass &ifst);
+-void OPENFSTDLL Concat(const FstClass &ifst, MutableFstClass *ofst);
++void Concat(MutableFstClass *ofst, const FstClass &ifst);
++void Concat(const FstClass &ifst, MutableFstClass *ofst);
+ 
+ }  // namespace script
+ }  // namespace fst
+diff --git a/src/include/fst/script/connect.h b/src/include/fst/script/connect.h
+index c6b87af..19c4390 100644
+--- a/src/include/fst/script/connect.h
++++ b/src/include/fst/script/connect.h
+@@ -35,7 +35,7 @@ void Connect(MutableFstClass *fst) {
+ }
+ #endif
+ 
+-void OPENFSTDLL Connect(MutableFstClass *fst);
++void Connect(MutableFstClass *fst);
+ 
+ }  // namespace script
+ }  // namespace fst
+diff --git a/src/include/fst/script/convert.h b/src/include/fst/script/convert.h
+index 6e24094..4a3ce6b 100644
+--- a/src/include/fst/script/convert.h
++++ b/src/include/fst/script/convert.h
+@@ -41,7 +41,7 @@ void Convert(ConvertArgs *args) {
+ #ifdef SWIG
+ %newobject Convert;
+ #endif
+-FstClass OPENFSTDLL *Convert(const FstClass& f, const string &new_type);
++FstClass *Convert(const FstClass& f, const string &new_type);
+ 
+ }  // namespace script
+ }  // namespace fst
+diff --git a/src/include/fst/script/decode.h b/src/include/fst/script/decode.h
+index 99bf10c..1064ad5 100644
+--- a/src/include/fst/script/decode.h
++++ b/src/include/fst/script/decode.h
+@@ -38,7 +38,7 @@ void Decode(DecodeArgs *args) {
+   delete decoder;
+ }
+ 
+-void OPENFSTDLL  Decode(MutableFstClass *fst, const string &coder_fname);
++void Decode(MutableFstClass *fst, const string &coder_fname);
+ 
+ }  // namespace script
+ }  // namespace fst
+diff --git a/src/include/fst/script/determinize.h b/src/include/fst/script/determinize.h
+index 466f501..5ff6388 100644
+--- a/src/include/fst/script/determinize.h
++++ b/src/include/fst/script/determinize.h
+@@ -61,7 +61,7 @@ void Determinize(DeterminizeArgs *args) {
+   Determinize(ifst, ofst, detargs);
+ }
+ 
+-void OPENFSTDLL Determinize(const FstClass &ifst, MutableFstClass *ofst,
++void Determinize(const FstClass &ifst, MutableFstClass *ofst,
+                  const DeterminizeOptions &opts =
+                    fst::script::DeterminizeOptions());
+ 
+diff --git a/src/include/fst/script/difference.h b/src/include/fst/script/difference.h
+index 3f92f24..76490d4 100644
+--- a/src/include/fst/script/difference.h
++++ b/src/include/fst/script/difference.h
+@@ -50,11 +50,11 @@ void Difference(DifferenceArgs2  *args) {
+ }
+ 
+ 
+-void OPENFSTDLL Difference(const FstClass &ifst1, const FstClass &ifst2,
++void Difference(const FstClass &ifst1, const FstClass &ifst2,
+                 MutableFstClass *ofst,
+                 ComposeFilter compose_filter);
+ 
+-void OPENFSTDLL Difference(const FstClass &ifst1, const FstClass &ifst2,
++void Difference(const FstClass &ifst1, const FstClass &ifst2,
+                 MutableFstClass *ofst,
+                 const ComposeOptions &opts = fst::script::ComposeOptions());
+ 
+diff --git a/src/include/fst/script/disambiguate.h b/src/include/fst/script/disambiguate.h
+index f91bde9..ace5c49 100644
+--- a/src/include/fst/script/disambiguate.h
++++ b/src/include/fst/script/disambiguate.h
+@@ -58,7 +58,7 @@ void Disambiguate(DisambiguateArgs *args) {
+   Disambiguate(ifst, ofst, disambargs);
+ }
+ 
+-void OPENFSTDLL Disambiguate(const FstClass &ifst, MutableFstClass *ofst,
++void Disambiguate(const FstClass &ifst, MutableFstClass *ofst,
+                  const DisambiguateOptions &opts =
+                    fst::script::DisambiguateOptions());
+ 
+diff --git a/src/include/fst/script/draw.h b/src/include/fst/script/draw.h
+index 8492777..2b66373 100644
+--- a/src/include/fst/script/draw.h
++++ b/src/include/fst/script/draw.h
+@@ -88,7 +88,7 @@ void DrawFst(FstDrawerArgs *args) {
+   fstdrawer.Draw(args->ostrm, args->dest);
+ }
+ 
+-void OPENFSTDLL DrawFst(const FstClass &fst,
++void DrawFst(const FstClass &fst,
+              const SymbolTable *isyms,
+              const SymbolTable *osyms,
+              const SymbolTable *ssyms,
+diff --git a/src/include/fst/script/encode.h b/src/include/fst/script/encode.h
+index 9d7c6cb..dc1a290 100644
+--- a/src/include/fst/script/encode.h
++++ b/src/include/fst/script/encode.h
+@@ -47,7 +47,7 @@ void Encode(EncodeArgs *args) {
+   delete encoder;
+ }
+ 
+-void OPENFSTDLL Encode(MutableFstClass *fst, uint32 flags, bool reuse_encoder,
++void Encode(MutableFstClass *fst, uint32 flags, bool reuse_encoder,
+             const string &coder_fname);
+ 
+ }  // namespace script
+diff --git a/src/include/fst/script/epsnormalize.h b/src/include/fst/script/epsnormalize.h
+index 3365e2e..50b12da 100644
+--- a/src/include/fst/script/epsnormalize.h
++++ b/src/include/fst/script/epsnormalize.h
+@@ -35,7 +35,7 @@ void EpsNormalize(EpsNormalizeArgs  *args) {
+   EpsNormalize(ifst, ofst, args->arg3);
+ }
+ 
+-void OPENFSTDLL EpsNormalize(const FstClass &ifst, MutableFstClass *ofst,
++void EpsNormalize(const FstClass &ifst, MutableFstClass *ofst,
+                   EpsNormalizeType norm_type = EPS_NORM_INPUT);
+ 
+ }  // namespace script
+diff --git a/src/include/fst/script/equal.h b/src/include/fst/script/equal.h
+index 9a0788e..9fb2d3c 100644
+--- a/src/include/fst/script/equal.h
++++ b/src/include/fst/script/equal.h
+@@ -35,7 +35,7 @@ void Equal(EqualArgs *args) {
+   args->retval = Equal(fst1, fst2, args->args.arg3);
+ }
+ 
+-bool OPENFSTDLL Equal(const FstClass &fst1, const FstClass &fst2,
++bool Equal(const FstClass &fst1, const FstClass &fst2,
+            float delta = kDelta);
+ 
+ }  // namespace script
+diff --git a/src/include/fst/script/equivalent.h b/src/include/fst/script/equivalent.h
+index 12e1870..43460c6 100644
+--- a/src/include/fst/script/equivalent.h
++++ b/src/include/fst/script/equivalent.h
+@@ -36,7 +36,7 @@ void Equivalent(EquivalentArgs *args) {
+   args->retval = Equivalent(fst1, fst2, args->args.arg3);
+ }
+ 
+-bool OPENFSTDLL Equivalent(const FstClass &fst1, const FstClass &fst2,
++bool Equivalent(const FstClass &fst1, const FstClass &fst2,
+                 float delta = kDelta);
+ 
+ }  // namespace script
+diff --git a/src/include/fst/script/fst-class.h b/src/include/fst/script/fst-class.h
+index cc8c1e2..fe2cf53 100644
+--- a/src/include/fst/script/fst-class.h
++++ b/src/include/fst/script/fst-class.h
+@@ -179,9 +179,9 @@ class FstClass : public FstClassBase {
+     return *this;
+   }
+ 
+-  static OPENFSTDLL FstClass *Read(const string &fname);
++  static FstClass *Read(const string &fname);
+ 
+-  static OPENFSTDLL FstClass *Read(istream &istr, const string &source);
++  static FstClass *Read(istream &istr, const string &source);
+ 
+   virtual const string &ArcType() const {
+     return impl_->ArcType();
+@@ -310,7 +310,7 @@ class MutableFstClass : public FstClass {
+     return GetImpl()->Write(ostr, opts);
+   }
+ 
+-  static OPENFSTDLL  MutableFstClass *Read(const string &fname, bool convert = false);
++  static MutableFstClass *Read(const string &fname, bool convert = false);
+ 
+   virtual void SetInputSymbols(SymbolTable *is) {
+     GetImpl()->SetInputSymbols(is);
+@@ -342,8 +342,8 @@ class MutableFstClass : public FstClass {
+ 
+ class VectorFstClass : public MutableFstClass {
+  public:
+-  explicit OPENFSTDLL VectorFstClass(const FstClass &other);
+-  explicit OPENFSTDLL VectorFstClass(const string &arc_type);
++  explicit VectorFstClass(const FstClass &other);
++  explicit VectorFstClass(const string &arc_type);
+ 
+   template<class Arc>
+   explicit VectorFstClass(const VectorFst<Arc> &fst) :
+@@ -362,7 +362,7 @@ class VectorFstClass : public MutableFstClass {
+     }
+   }
+ 
+-  static OPENFSTDLL VectorFstClass *Read(const string &fname);
++  static VectorFstClass *Read(const string &fname);
+ 
+   // Converter / creator for known arc types
+   template<class Arc>
+diff --git a/src/include/fst/script/info.h b/src/include/fst/script/info.h
+index 95657e3..f434bd5 100644
+--- a/src/include/fst/script/info.h
++++ b/src/include/fst/script/info.h
+@@ -38,7 +38,7 @@ void PrintFstInfo(InfoArgs *args) {
+     fst.Write("");
+ }
+ 
+-void OPENFSTDLL PrintFstInfo(const FstClass &f, bool test_properties,
++void PrintFstInfo(const FstClass &f, bool test_properties,
+                   const string &arc_filter, const string &info_type,
+                   bool pipe, bool verify);
+ 
+diff --git a/src/include/fst/script/intersect.h b/src/include/fst/script/intersect.h
+index 409c11d..8011024 100644
+--- a/src/include/fst/script/intersect.h
++++ b/src/include/fst/script/intersect.h
+@@ -49,11 +49,11 @@ void Intersect(IntersectArgs2 *args) {
+   Intersect(ifst1, ifst2, ofst, args->arg4);
+ }
+ 
+-void OPENFSTDLL Intersect(const FstClass &ifst1, const FstClass &ifst2,
++void Intersect(const FstClass &ifst1, const FstClass &ifst2,
+                MutableFstClass *ofst,
+                ComposeFilter compose_filter);
+ 
+-void OPENFSTDLL Intersect(const FstClass &ifst, const FstClass &ifst2,
++void Intersect(const FstClass &ifst, const FstClass &ifst2,
+                MutableFstClass *ofst,
+                const ComposeOptions &opts = fst::script::ComposeOptions());
+ 
+diff --git a/src/include/fst/script/invert.h b/src/include/fst/script/invert.h
+index 0855974..1befd9f 100644
+--- a/src/include/fst/script/invert.h
++++ b/src/include/fst/script/invert.h
+@@ -35,7 +35,7 @@ void Invert(MutableFstClass *fst) {
+ }
+ #endif
+ 
+-void OPENFSTDLL Invert(MutableFstClass *fst);
++void Invert(MutableFstClass *fst);
+ 
+ }  // namespace script
+ }  // namespace fst
+diff --git a/src/include/fst/script/map.h b/src/include/fst/script/map.h
+index 76b4044..3caaa9f 100644
+--- a/src/include/fst/script/map.h
++++ b/src/include/fst/script/map.h
+@@ -113,7 +113,7 @@ void Map(MapArgs *args) {
+ #ifdef SWIG
+ %newobject Map;
+ #endif
+-FstClass OPENFSTDLL *Map(const FstClass& f, MapType map_type,
++FstClass *Map(const FstClass& f, MapType map_type,
+          float delta = fst::kDelta,
+          const WeightClass &w = fst::script::WeightClass::Zero());
+ 
+diff --git a/src/include/fst/script/minimize.h b/src/include/fst/script/minimize.h
+index 63be317..f250d03 100644
+--- a/src/include/fst/script/minimize.h
++++ b/src/include/fst/script/minimize.h
+@@ -34,7 +34,7 @@ void Minimize(MinimizeArgs *args) {
+   Minimize(ofst1, ofst2, args->arg3);
+ }
+ 
+-void OPENFSTDLL Minimize(MutableFstClass *ofst1, MutableFstClass *ofst2 = 0,
++void Minimize(MutableFstClass *ofst1, MutableFstClass *ofst2 = 0,
+               float delta = kDelta);
+ 
+ }  // namespace script
+diff --git a/src/include/fst/script/print.h b/src/include/fst/script/print.h
+index e2734ac..84d7efe 100644
+--- a/src/include/fst/script/print.h
++++ b/src/include/fst/script/print.h
+@@ -65,7 +65,7 @@ void PrintFst(FstPrinterArgs *args) {
+   fstprinter.Print(args->ostrm, args->dest);
+ }
+ 
+-void OPENFSTDLL PrintFst(const FstClass &fst, ostream &ostrm, const string &dest,
++void PrintFst(const FstClass &fst, ostream &ostrm, const string &dest,
+               const SymbolTable *isyms,
+               const SymbolTable *osyms,
+               const SymbolTable *ssyms,
+diff --git a/src/include/fst/script/project.h b/src/include/fst/script/project.h
+index 56f2c9d..12ee890 100644
+--- a/src/include/fst/script/project.h
++++ b/src/include/fst/script/project.h
+@@ -33,7 +33,7 @@ void Project(ProjectArgs *args) {
+   Project(ofst, args->arg2);
+ }
+ 
+-void OPENFSTDLL Project(MutableFstClass *ofst, ProjectType project_type);
++void Project(MutableFstClass *ofst, ProjectType project_type);
+ 
+ }  // namespace script
+ }  // namespace fst
+diff --git a/src/include/fst/script/prune.h b/src/include/fst/script/prune.h
+index 03ddd7e..7118ff1 100644
+--- a/src/include/fst/script/prune.h
++++ b/src/include/fst/script/prune.h
+@@ -129,20 +129,20 @@ void Prune(PruneArgs4 *args) {
+ 
+ 
+ // 1
+-void OPENFSTDLL  Prune(MutableFstClass *fst, const PruneOptions &opts);
++void Prune(MutableFstClass *fst, const PruneOptions &opts);
+ 
+ // 2
+-void OPENFSTDLL Prune(const FstClass &ifst, MutableFstClass *fst,
++void Prune(const FstClass &ifst, MutableFstClass *fst,
+            const PruneOptions &opts);
+ 
+ // 3
+-void OPENFSTDLL Prune(const FstClass &ifst, MutableFstClass *ofst,
++void Prune(const FstClass &ifst, MutableFstClass *ofst,
+            const WeightClass &weight_threshold,
+            int64 state_threshold = kNoStateId,
+            float delta = kDelta);
+ 
+ // 4
+-void OPENFSTDLL Prune(MutableFstClass *fst, const WeightClass& weight_threshold,
++void Prune(MutableFstClass *fst, const WeightClass& weight_threshold,
+            int64 state_threshold, float delta);
+ 
+ }  // namespace script
+diff --git a/src/include/fst/script/push.h b/src/include/fst/script/push.h
+index 30c9596..cebd655 100644
+--- a/src/include/fst/script/push.h
++++ b/src/include/fst/script/push.h
+@@ -55,11 +55,11 @@ void Push(PushArgs2 *args) {
+ }
+ 
+ // 1
+-void OPENFSTDLL Push(MutableFstClass *ofst, ReweightType type, float delta = kDelta,
++void Push(MutableFstClass *ofst, ReweightType type, float delta = kDelta,
+           bool remove_total_weight = false);
+ 
+ // 2
+-void OPENFSTDLL Push(const FstClass &ifst, MutableFstClass *ofst, uint32 flags,
++void Push(const FstClass &ifst, MutableFstClass *ofst, uint32 flags,
+           ReweightType dir, float delta);
+ 
+ }  // namespace script
+diff --git a/src/include/fst/script/randequivalent.h b/src/include/fst/script/randequivalent.h
+index 53ee241..b929683 100644
+--- a/src/include/fst/script/randequivalent.h
++++ b/src/include/fst/script/randequivalent.h
+@@ -81,7 +81,7 @@ void RandEquivalent(RandEquivalentArgs2 *args) {
+ 
+ 
+ // 1
+-bool OPENFSTDLL RandEquivalent(const FstClass &fst1,
++bool RandEquivalent(const FstClass &fst1,
+                     const FstClass &fst2,
+                     int32 seed = time(0),
+                     ssize_t num_paths = 1,
+@@ -89,7 +89,7 @@ bool OPENFSTDLL RandEquivalent(const FstClass &fst1,
+                     int path_length = INT_MAX);
+ 
+ // 2
+-bool OPENFSTDLL RandEquivalent(const FstClass &fst1,
++bool RandEquivalent(const FstClass &fst1,
+                     const FstClass &fst2,
+                     int32 seed,
+                     ssize_t num_paths,
+diff --git a/src/include/fst/script/randgen.h b/src/include/fst/script/randgen.h
+index 3029484..b7e17a8 100644
+--- a/src/include/fst/script/randgen.h
++++ b/src/include/fst/script/randgen.h
+@@ -63,7 +63,7 @@ void RandGen(RandGenArgs *args) {
+ 
+ 
+ // Client-facing prototype
+-void OPENFSTDLL RandGen(const FstClass &ifst, MutableFstClass *ofst, int32 seed = time(0),
++void RandGen(const FstClass &ifst, MutableFstClass *ofst, int32 seed = time(0),
+              const RandGenOptions<RandArcSelection> &opts =
+              fst::RandGenOptions<fst::script::RandArcSelection>(
+                  fst::script::UNIFORM_ARC_SELECTOR));
+diff --git a/src/include/fst/script/relabel.h b/src/include/fst/script/relabel.h
+index ac4f0cc..6bbb4c5 100644
+--- a/src/include/fst/script/relabel.h
++++ b/src/include/fst/script/relabel.h
+@@ -78,20 +78,20 @@ void Relabel(args::Package<MutableFstClass*, const SymbolTable*,
+ 
+ 
+ // 1
+-void OPENFSTDLL Relabel(MutableFstClass *ofst,
++void Relabel(MutableFstClass *ofst,
+              const SymbolTable *old_isyms, const SymbolTable *relabel_isyms,
+              bool attach_new_isyms,
+              const SymbolTable *old_osyms, const SymbolTable *relabel_osyms,
+              bool attch_new_osyms);
+ 
+ // 2
+-void OPENFSTDLL Relabel(MutableFstClass *ofst,
++void Relabel(MutableFstClass *ofst,
+              const vector<pair<int64, int64> > &ipairs,
+              const vector<pair<int64, int64> > &opairs);
+ 
+ 
+ // 3
+-void OPENFSTDLL Relabel(MutableFstClass *fst,
++void Relabel(MutableFstClass *fst,
+              const SymbolTable *new_isymbols,
+              const SymbolTable *new_osymbols);
+ 
+diff --git a/src/include/fst/script/replace.h b/src/include/fst/script/replace.h
+index 6dfabfe..0dcb43f 100644
+--- a/src/include/fst/script/replace.h
++++ b/src/include/fst/script/replace.h
+@@ -68,7 +68,7 @@ void Replace(ReplaceArgs *args) {
+   Replace(fst_tuples, ofst, repargs);
+ }
+ 
+-void OPENFSTDLL Replace(const vector<pair<int64, const FstClass *> > &tuples,
++void Replace(const vector<pair<int64, const FstClass *> > &tuples,
+              MutableFstClass *ofst, const ReplaceOptions &opts);
+ 
+ }  // namespace script
+diff --git a/src/include/fst/script/reverse.h b/src/include/fst/script/reverse.h
+index 5fa47ed..4dc3a54 100644
+--- a/src/include/fst/script/reverse.h
++++ b/src/include/fst/script/reverse.h
+@@ -35,7 +35,7 @@ void Reverse(ReverseArgs *args) {
+   Reverse(fst1, fst2, require_superinitial);
+ }
+ 
+-void OPENFSTDLL Reverse(const FstClass &fst1, MutableFstClass *fst2,
++void Reverse(const FstClass &fst1, MutableFstClass *fst2,
+              bool require_superinitial = true);
+ 
+ }  // namespace script
+diff --git a/src/include/fst/script/reweight.h b/src/include/fst/script/reweight.h
+index 1924c20..7bce839 100644
+--- a/src/include/fst/script/reweight.h
++++ b/src/include/fst/script/reweight.h
+@@ -44,7 +44,7 @@ void Reweight(ReweightArgs *args) {
+   Reweight(fst, potentials, args->arg3);
+ }
+ 
+-void OPENFSTDLL Reweight(MutableFstClass *fst, const vector<WeightClass> &potential,
++void Reweight(MutableFstClass *fst, const vector<WeightClass> &potential,
+               ReweightType reweight_type);
+ 
+ }  // namespace script
+diff --git a/src/include/fst/script/rmepsilon.h b/src/include/fst/script/rmepsilon.h
+index 1f16104..62fed03 100644
+--- a/src/include/fst/script/rmepsilon.h
++++ b/src/include/fst/script/rmepsilon.h
+@@ -187,20 +187,20 @@ void RmEpsilon(RmEpsilonArgs3 *args) {
+ //
+ 
+ // 1
+-void OPENFSTDLL RmEpsilon(const FstClass &ifst, MutableFstClass *ofst,
++void RmEpsilon(const FstClass &ifst, MutableFstClass *ofst,
+                bool reverse = false,
+                const RmEpsilonOptions& opts =
+                  fst::script::RmEpsilonOptions());
+ 
+ // 2
+-void OPENFSTDLL RmEpsilon(MutableFstClass *arc, bool connect = true,
++void RmEpsilon(MutableFstClass *arc, bool connect = true,
+                const WeightClass &weight_threshold =
+                  fst::script::WeightClass::Zero(),
+                int64 state_threshold = fst::kNoStateId,
+                float delta = fst::kDelta);
+ 
+ // 3
+-void OPENFSTDLL RmEpsilon(MutableFstClass *fst, vector<WeightClass> *distance,
++void RmEpsilon(MutableFstClass *fst, vector<WeightClass> *distance,
+                const RmEpsilonOptions &opts);
+ 
+ 
+diff --git a/src/include/fst/script/shortest-distance.h b/src/include/fst/script/shortest-distance.h
+index 92af6cd..39c5045 100644
+--- a/src/include/fst/script/shortest-distance.h
++++ b/src/include/fst/script/shortest-distance.h
+@@ -230,11 +230,11 @@ void ShortestDistance(ShortestDistanceArgs3 *args) {
+ 
+ 
+ // 1
+-void OPENFSTDLL  ShortestDistance(const FstClass &fst, vector<WeightClass> *distance,
++void ShortestDistance(const FstClass &fst, vector<WeightClass> *distance,
+                       const ShortestDistanceOptions &opts);
+ 
+ // 2
+-void OPENFSTDLL  ShortestDistance(const FstClass &ifst, vector<WeightClass> *distance,
++void ShortestDistance(const FstClass &ifst, vector<WeightClass> *distance,
+                       bool reverse = false, double delta = fst::kDelta);
+ 
+ #ifndef SWIG
+diff --git a/src/include/fst/script/shortest-path.h b/src/include/fst/script/shortest-path.h
+index 91af0bf..b3a3eb9 100644
+--- a/src/include/fst/script/shortest-path.h
++++ b/src/include/fst/script/shortest-path.h
+@@ -169,13 +169,13 @@ void ShortestPath(ShortestPathArgs2 *args) {
+ 
+ 
+ // 1
+-void OPENFSTDLL ShortestPath(const FstClass &ifst, MutableFstClass *ofst,
++void ShortestPath(const FstClass &ifst, MutableFstClass *ofst,
+                   vector<WeightClass> *distance,
+                   const ShortestPathOptions &opts);
+ 
+ 
+ // 2
+-void OPENFSTDLL ShortestPath(const FstClass &ifst, MutableFstClass *ofst,
++void ShortestPath(const FstClass &ifst, MutableFstClass *ofst,
+                   size_t n = 1, bool unique = false,
+                   bool first_path = false,
+                   WeightClass weight_threshold =
+diff --git a/src/include/fst/script/synchronize.h b/src/include/fst/script/synchronize.h
+index 8ac5773..3c0c905 100644
+--- a/src/include/fst/script/synchronize.h
++++ b/src/include/fst/script/synchronize.h
+@@ -34,7 +34,7 @@ void Synchronize(SynchronizeArgs *args) {
+   Synchronize(ifst, ofst);
+ }
+ 
+-void OPENFSTDLL Synchronize(const FstClass &ifst, MutableFstClass *ofst);
++void Synchronize(const FstClass &ifst, MutableFstClass *ofst);
+ 
+ }  // namespace script
+ }  // namespace fst
+diff --git a/src/include/fst/script/text-io.h b/src/include/fst/script/text-io.h
+index d167a33..d97a007 100644
+--- a/src/include/fst/script/text-io.h
++++ b/src/include/fst/script/text-io.h
+@@ -38,11 +38,11 @@ using std::vector;
+ namespace fst {
+ namespace script {
+ 
+-bool OPENFSTDLL ReadPotentials(const string &weight_type,
++bool ReadPotentials(const string &weight_type,
+                     const string& filename,
+                     vector<WeightClass>* potential);
+ 
+-bool OPENFSTDLL WritePotentials(const string& filename,
++bool WritePotentials(const string& filename,
+                      const vector<WeightClass>& potential);
+ 
+ }  // namespace script
+diff --git a/src/include/fst/script/topsort.h b/src/include/fst/script/topsort.h
+index da70020..4e27e48 100644
+--- a/src/include/fst/script/topsort.h
++++ b/src/include/fst/script/topsort.h
+@@ -32,7 +32,7 @@ void TopSort(TopSortArgs *args) {
+   args->retval = TopSort(fst);
+ }
+ 
+-bool OPENFSTDLL TopSort(MutableFstClass *fst);
++bool TopSort(MutableFstClass *fst);
+ 
+ }  // namespace script
+ }  // namespace fst
+diff --git a/src/include/fst/script/union.h b/src/include/fst/script/union.h
+index d4f4597..780e484 100644
+--- a/src/include/fst/script/union.h
++++ b/src/include/fst/script/union.h
+@@ -34,7 +34,7 @@ void Union(UnionArgs *args) {
+   Union(fst1, fst2);
+ }
+ 
+-void OPENFSTDLL Union(MutableFstClass *fst1, const FstClass &fst2);
++void Union(MutableFstClass *fst1, const FstClass &fst2);
+ 
+ }  // namespace script
+ }  // namespace fst
+diff --git a/src/include/fst/script/verify.h b/src/include/fst/script/verify.h
+index c92215b..6904003 100644
+--- a/src/include/fst/script/verify.h
++++ b/src/include/fst/script/verify.h
+@@ -32,7 +32,7 @@ void Verify(VerifyArgs *args) {
+   args->retval = Verify(*fst);
+ }
+ 
+-bool OPENFSTDLL Verify(const FstClass &fst1);
++bool Verify(const FstClass &fst1);
+ 
+ }  // namespace script
+ }  // namespace fst
+diff --git a/src/include/fst/script/weight-class.h b/src/include/fst/script/weight-class.h
+index b204ffd..b9f7ddf 100644
+--- a/src/include/fst/script/weight-class.h
++++ b/src/include/fst/script/weight-class.h
+@@ -82,7 +82,7 @@ class WeightClass {
+   explicit WeightClass(const W& weight)
+   : element_type_(OTHER), impl_(new WeightClassImpl<W>(weight)) { }
+ 
+-  OPENFSTDLL WeightClass(const string &weight_type, const string &weight_str);
++  WeightClass(const string &weight_type, const string &weight_str);
+ 
+   WeightClass(const WeightClass &other) :
+       element_type_(other.element_type_),
+diff --git a/src/include/fst/symbol-table.h b/src/include/fst/symbol-table.h
+index 8158d1c..7e19364 100644
+--- a/src/include/fst/symbol-table.h
++++ b/src/include/fst/symbol-table.h
+@@ -62,7 +62,8 @@ struct SymbolTableReadOptions {
+ };
+ 
+ struct SymbolTableTextOptions {
+-  OPENFSTDLL SymbolTableTextOptions();
++  SymbolTableTextOptions();
++
+   bool allow_negative;
+   string fst_field_separator;
+ };
+@@ -79,15 +80,15 @@ namespace internal {
+ // stored.
+ class DenseSymbolMap {
+  public:
+-  OPENFSTDLL DenseSymbolMap();
+-  OPENFSTDLL DenseSymbolMap(const DenseSymbolMap& x);
+-  OPENFSTDLL ~DenseSymbolMap();
++  DenseSymbolMap();
++  DenseSymbolMap(const DenseSymbolMap& x);
++  ~DenseSymbolMap();
+ 
+-  pair<int64, bool> OPENFSTDLL InsertOrFind(const string& key);
+-  int64 OPENFSTDLL Find(const string& key) const;
++  pair<int64, bool> InsertOrFind(const string& key);
++  int64 Find(const string& key) const;
+ 
+   const size_t size() const { return symbols_.size(); }
+-  const string  GetSymbol(size_t idx) const {
++  const string GetSymbol(size_t idx) const {
+     return string(symbols_[idx], strlen(symbols_[idx]));
+   }
+ 
+@@ -122,20 +123,20 @@ class SymbolTableImpl {
+         key_map_(impl.key_map_),
+         check_sum_finalized_(false) {}
+ 
+-	int64 OPENFSTDLL AddSymbol(const string& symbol, int64 key);
++  int64 AddSymbol(const string& symbol, int64 key);
+ 
+   int64 AddSymbol(const string& symbol) {
+     return AddSymbol(symbol, available_key_);
+   }
+ 
+-  static OPENFSTDLL SymbolTableImpl* ReadText(
++  static SymbolTableImpl* ReadText(
+       istream &strm, const string &name,
+       const SymbolTableTextOptions &opts = SymbolTableTextOptions());
+ 
+-  static OPENFSTDLL SymbolTableImpl* Read(istream &strm,
++  static SymbolTableImpl* Read(istream &strm,
+                                const SymbolTableReadOptions& opts);
+ 
+-  bool OPENFSTDLL Write(ostream &strm) const;
++  bool Write(ostream &strm) const;
+ 
+   // Return the string associated with the key. If the key is out of
+   // range (<0, >max), return an empty string.
+@@ -206,7 +207,7 @@ class SymbolTableImpl {
+   // computation (i.e., if check_sum_finalized_ is false).
+   // Takes ~2.5 microseconds (dbg) or ~230 nanoseconds (opt) on a 2.67GHz Xeon
+   // if the checksum is up-to-date (requiring no recomputation).
+-   void OPENFSTDLL MaybeRecomputeCheckSum() const;
++  void MaybeRecomputeCheckSum() const;
+ 
+   string name_;
+   int64 available_key_;
+@@ -238,7 +239,8 @@ class SymbolTableImpl {
+ //
+ class SymbolTable {
+  public:
+-  OPENFSTDLL static const int64 kNoSymbol = -1;
++  static const int64 kNoSymbol = -1;
++
+   // Construct symbol table with an unspecified name.
+   SymbolTable() : impl_(new SymbolTableImpl("<unspecified>")) {}
+ 
+@@ -278,7 +280,7 @@ class SymbolTable {
+   }
+ 
+   // read an ascii representation of the symbol table
+-	static OPENFSTDLL SymbolTable* ReadText(const string& filename,
++  static SymbolTable* ReadText(const string& filename,
+       const SymbolTableTextOptions &opts = SymbolTableTextOptions()) {
+     ifstream strm(filename.c_str(), ifstream::in);
+     if (!strm.good()) {
+@@ -291,7 +293,7 @@ class SymbolTable {
+ 
+   // WARNING: Reading via symbol table read options should
+   //          not be used. This is a temporary work around.
+-	static OPENFSTDLL SymbolTable*  Read(istream &strm,
++  static SymbolTable* Read(istream &strm,
+                            const SymbolTableReadOptions& opts) {
+     SymbolTableImpl* impl = SymbolTableImpl::Read(strm, opts);
+     if (!impl)
+@@ -301,14 +303,14 @@ class SymbolTable {
+   }
+ 
+   // read a binary dump of the symbol table from a stream
+-	static OPENFSTDLL SymbolTable*  Read(istream &strm, const string& source) {
++  static SymbolTable* Read(istream &strm, const string& source) {
+     SymbolTableReadOptions opts;
+     opts.source = source;
+     return Read(strm, opts);
+   }
+ 
+   // read a binary dump of the symbol table
+-	static OPENFSTDLL SymbolTable*  Read(const string& filename) {
++  static SymbolTable* Read(const string& filename) {
+     ifstream strm(filename.c_str(), ifstream::in | ifstream::binary);
+     if (!strm.good()) {
+       LOG(ERROR) << "SymbolTable::Read: Can't open file " << filename;
+@@ -345,7 +347,7 @@ class SymbolTable {
+   // Note string symbols with the same key value with still have the same
+   // key value after the symbol table has been merged, but a different
+   // value. Adding symbol tables do not result in changes in the base table.
+-  virtual OPENFSTDLL void AddTable(const SymbolTable& table);
++  virtual void AddTable(const SymbolTable& table);
+ 
+   // return the name of the symbol table
+   virtual const string& Name() const {
+@@ -364,11 +366,11 @@ class SymbolTable {
+     return impl_->LabeledCheckSum();
+   }
+ 
+-	virtual bool OPENFSTDLL Write(ostream &strm) const {
++  virtual bool Write(ostream &strm) const {
+     return impl_->Write(strm);
+   }
+ 
+-	bool OPENFSTDLL Write(const string& filename) const {
++  bool Write(const string& filename) const {
+     ofstream strm(filename.c_str(), ofstream::out | ofstream::binary);
+     if (!strm.good()) {
+       LOG(ERROR) << "SymbolTable::Write: Can't open file " << filename;
+@@ -378,7 +380,7 @@ class SymbolTable {
+   }
+ 
+   // Dump an ascii text representation of the symbol table via a stream
+-  virtual OPENFSTDLL bool WriteText(
++  virtual bool WriteText(
+       ostream &strm,
+       const SymbolTableTextOptions &opts = SymbolTableTextOptions()) const;
+ 
+diff --git a/src/include/fst/util.h b/src/include/fst/util.h
+index 2aa29c3..e2738b7 100644
+--- a/src/include/fst/util.h
++++ b/src/include/fst/util.h
+@@ -281,7 +281,7 @@ WRITE_STL_ASSOC_TYPE(unordered_map);
+ 
+ // Utilities for converting between int64 or Weight and string.
+ 
+-int64 OPENFSTDLL StrToInt64(const string &s, const string &src, size_t nline,
++int64 StrToInt64(const string &s, const string &src, size_t nline,
+                  bool allow_negative, bool *error = 0);
+ 
+ template <typename Weight>
+@@ -297,7 +297,7 @@ Weight StrToWeight(const string &s, const string &src, size_t nline) {
+   return w;
+ }
+ 
+-void OPENFSTDLL Int64ToStr(int64 n, string *s);
++void Int64ToStr(int64 n, string *s);
+ 
+ template <typename Weight>
+ void WeightToStr(Weight w, string *s) {
+@@ -311,7 +311,7 @@ void WeightToStr(Weight w, string *s) {
+ 
+ // Modifies line, vec consists of pointers to of buffer beginning
+ // with line.
+-void OPENFSTDLL SplitToVector(char *line, const char *delim,
++void SplitToVector(char *line, const char *delim,
+                    vector<char *> *vec, bool omit_empty_strings);
+ 
+ // Returns true on success
+@@ -397,15 +397,15 @@ bool WriteLabelPairs(const string& filename,
+ 
+ // Utilities for converting a type name to a legal C symbol.
+ 
+-void OPENFSTDLL ConvertToLegalCSymbol(string *s);
++void ConvertToLegalCSymbol(string *s);
+ 
+ 
+ //
+ // UTILITIES FOR STREAM I/O
+ //
+ 
+-bool OPENFSTDLL AlignInput(istream &strm);
+-bool OPENFSTDLL AlignOutput(ostream &strm);
++bool AlignInput(istream &strm);
++bool AlignOutput(ostream &strm);
+ 
+ //
+ // UTILITIES FOR PROTOCOL BUFFER I/O
+diff --git a/src/lib/compat.cc b/src/lib/compat.cc
+index 83963fa..43dad4c 100644
+--- a/src/lib/compat.cc
++++ b/src/lib/compat.cc
+@@ -26,21 +26,3 @@ void FailedNewHandler() {
+   cerr << "Memory allocation failed\n";
+   exit(1);
+ }
+-
+-unsigned long long __builtin_ctzll(unsigned long long v) {
+-  int c = 0;
+-  if (v) {
+-    v = (v ^ (v - 1)) >> 1;  // Set v's trailing 0s to 1s and zero rest
+-    for (c = 0; v; c++) {
+-      v >>= 1;
+-    }
+-  } else{
+-    c = CHAR_BIT * sizeof(v);
+-  }
+-  return c;
+-}
+-
+-unsigned long long  __builtin_popcountll(unsigned long long  w) {
+-  std::bitset<64> bs = w;
+-  return bs.count();
+-}
+diff --git a/src/lib/mapped-file.cc b/src/lib/mapped-file.cc
+index 387e51e..63a50d7 100644
+--- a/src/lib/mapped-file.cc
++++ b/src/lib/mapped-file.cc
+@@ -18,7 +18,7 @@
+ 
+ #include <errno.h>
+ #include <fcntl.h>
+-
++#include <unistd.h>
+ 
+ namespace fst {
+ 
+@@ -33,12 +33,10 @@ MappedFile::MappedFile(const MemoryRegion &region) : region_(region) { }
+ MappedFile::~MappedFile() {
+   if (region_.size != 0) {
+     if (region_.mmap != NULL) {
+-#ifndef _MSC_VER
+       VLOG(1) << "munmap'ed " << region_.size << " bytes at " << region_.mmap;
+       if (munmap(region_.mmap, region_.size) != 0) {
+         LOG(ERROR) << "failed to unmap region: "<< strerror(errno);
+       }
+-#endif
+     } else {
+       if (region_.data != 0) {
+         operator delete(static_cast<char*>(region_.data) - region_.offset);
+@@ -74,7 +72,6 @@ MappedFile* MappedFile::Borrow(void *data) {
+ MappedFile* MappedFile::Map(istream* s, bool memorymap,
+                             const string& source, size_t size) {
+   std::streampos spos = s->tellg();
+-#ifndef _MSC_VER
+   if (memorymap && spos >= 0 && spos % kArchAlignment == 0) {
+     size_t pos = spos;
+     int fd = open(source.c_str(), O_RDONLY);
+@@ -103,7 +100,6 @@ MappedFile* MappedFile::Map(istream* s, bool memorymap,
+       }
+     }
+   }
+-#endif
+   // If all else fails resort to reading from file into allocated buffer.
+   if (memorymap) {
+     LOG(WARNING) << "File mapping at offset " << spos << " of file "
+diff --git a/src/lib/symbol-table.cc b/src/lib/symbol-table.cc
+index 91390ba..4c5a2e6 100644
+--- a/src/lib/symbol-table.cc
++++ b/src/lib/symbol-table.cc
+@@ -201,7 +201,7 @@ bool SymbolTableImpl::Write(ostream &strm) const {
+   return true;
+ }
+ 
+-//const OPENFSTDLL int64 SymbolTable::kNoSymbol;
++const int64 SymbolTable::kNoSymbol;
+ 
+ void SymbolTable::AddTable(const SymbolTable& table) {
+   MutateCheck();

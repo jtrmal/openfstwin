@@ -1,18 +1,5 @@
-
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// Copyright 2005-2010 Google, Inc.
-// Author: jpr@google.com (Jake Ratkiewicz)
+// See www.openfst.org for extensive documentation on this weighted
+// finite-state transducer library.
 
 #ifndef FST_SCRIPT_ARCSORT_H_
 #define FST_SCRIPT_ARCSORT_H_
@@ -24,24 +11,23 @@
 namespace fst {
 namespace script {
 
-enum ArcSortType { ILABEL_COMPARE, OLABEL_COMPARE };
+enum ArcSortType { ILABEL_SORT, OLABEL_SORT };
 
-typedef args::Package<MutableFstClass*, const ArcSortType> ArcSortArgs;
+using ArcSortArgs = args::Package<MutableFstClass *, ArcSortType>;
 
-template<class Arc>
+template <class Arc>
 void ArcSort(ArcSortArgs *args) {
   MutableFst<Arc> *fst = args->arg1->GetMutableFst<Arc>();
-
-  if (args->arg2 == ILABEL_COMPARE) {
+  if (args->arg2 == ILABEL_SORT) {
     ILabelCompare<Arc> icomp;
     ArcSort(fst, icomp);
-  } else {       // OLABEL_COMPARE
+  } else {  // args->arg2 == OLABEL_SORT.
     OLabelCompare<Arc> ocomp;
     ArcSort(fst, ocomp);
   }
 }
 
-void OPENFSTDLL ArcSort(MutableFstClass *ofst, ArcSortType sort_type);
+void ArcSort(MutableFstClass *ofst, ArcSortType);
 
 }  // namespace script
 }  // namespace fst

@@ -4,7 +4,7 @@ if HAVE_BIN
 bin_PROGRAMS = fstlinear fstloglinearapply
 
 LDADD = libfstlinearscript.la ../../script/libfstscript.la \
-	../../lib/libfst.la -lm -ldl
+    ../../lib/libfst.la -lm $(DL_LIBS)
 
 fstlinear_SOURCES = fstlinear.cc
 
@@ -13,12 +13,15 @@ endif
 
 if HAVE_SCRIPT
 libfstlinearscript_la_SOURCES = linearscript.cc
-libfstlinearscript_la_LDFLAGS = -version-info 1:0:0
+libfstlinearscript_la_LDFLAGS = -version-info 7:0:0 -lm $(DL_LIBS)
+libfstlinearscript_la_LIBADD = ../../script/libfstscript.la \
+							../../lib/libfst.la -lm $(DL_LIBS)
 endif
 
 if HAVE_SCRIPT
-libfst_LTLIBRARIES = libfstlinearscript.la linear_tagger-fst.la \
-	linear_classifier-fst.la
+libfst_LTLIBRARIES = linear_tagger-fst.la \
+    linear_classifier-fst.la
+lib_LTLIBRARIES = libfstlinearscript.la
 else
 libfst_LTLIBRARIES = linear_tagger-fst.la linear_classifier-fst.la
 endif
