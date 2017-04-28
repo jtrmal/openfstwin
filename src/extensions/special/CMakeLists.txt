@@ -15,7 +15,8 @@ if(HAVE_BIN)
   target_link_libraries(fstspecial-bin
     fstscript
     fst
-  )
+    ${CMAKE_DL_LIBS}
+ )
 endif(HAVE_BIN)
 
 

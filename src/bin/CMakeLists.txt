@@ -1,7 +1,7 @@
 function (add_executable2 _name)
     add_executable(${ARGV})
     if (TARGET ${_name})
-        target_link_libraries(${_name} fstscript fst)
+        target_link_libraries(${_name} fstscript fst ${CMAKE_DL_LIBS})
     endif()
 
     install(TARGETS ${_name} RUNTIME DESTINATION bin)

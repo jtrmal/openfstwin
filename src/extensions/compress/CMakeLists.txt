@@ -25,7 +25,8 @@ if(HAVE_BIN)
     fstcompressscript 
     fstscript 
     fst
-  )
+    ${CMAKE_DL_LIBS}
+   )
 
   add_executable(fstrandmod
     fstrandmod.cc
@@ -35,6 +36,7 @@ if(HAVE_BIN)
     fstcompressscript 
     fstscript 
     fst
+    ${CMAKE_DL_LIBS}
   )
 
   install(TARGETS fstcompress fstrandmod 

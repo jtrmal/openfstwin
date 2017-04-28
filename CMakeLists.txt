@@ -6,8 +6,10 @@ if (ICU_FOUND)
   set(LIBS ${LIBS} ${ICU_LIBRARIES})
 endif (ICU_FOUND)
 
+cmake_minimum_required(VERSION 3.1)
 set(CMAKE_MACOSX_RPATH 1)
-cmake_minimum_required(VERSION 2.8)
+set(CMAKE_CXX_STANDARD 11)
+
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(HAVE_BIN          "Build the fst binaries" ON)
 option(HAVE_SCRIPT       "Build the fstscript" ON)

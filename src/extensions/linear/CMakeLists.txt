@@ -26,7 +26,8 @@ if(HAVE_BIN)
     fstlinearscript
     fstscript 
     fst
-  )
+    ${CMAKE_DL_LIBS}
+ )
 
   add_executable(fstloglinearapply
     fstloglinearapply.cc)
@@ -34,6 +35,7 @@ if(HAVE_BIN)
     fstlinearscript
     fstscript 
     fst
+    ${CMAKE_DL_LIBS}
   )
   install(TARGETS fstlinear fstloglinearapply
     RUNTIME DESTINATION bin
